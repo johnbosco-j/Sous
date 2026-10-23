@@ -30,7 +30,8 @@ export interface KitchenState {
   mealsCooked: number;
 }
 
-export const DATA_PATH = resolve(process.env.SOUS_DATA_PATH ?? 'data/kitchen.json');
+// Serverless file systems are read-only except /tmp (demo state is then per instance).
+export const DATA_PATH = resolve(process.env.SOUS_DATA_PATH ?? (process.env.VERCEL ? '/tmp/sous/kitchen.json' : 'data/kitchen.json'));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 import type { Message, Tool as BedrockTool } from '@aws-sdk/client-bedrock-runtime';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { createSousServer } from '../mcp/server.js';
 import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { bedrockAvailable, converse } from '../aws/bedrock.js';
 import { activeTimers, getState, Timer } from '../domain/store.js';
@@ -57,8 +59,14 @@ class AgentSession {
       { name: 'sous-alexa-plus-simulator', version: '1.0.0' },
       { capabilities: { extensions: { 'io.modelcontextprotocol/ui': { mimeTypes: ['text/html;profile=mcp-app'] } } } as any }
     );
-    const transport = new StreamableHTTPClientTransport(new URL(this.mcpUrl));
-    await client.connect(transport);
+    if (this.mcpUrl === 'memory') {
+      // Serverless: same MCP protocol (JSON-RPC, initialize, tools/list, tools/call, resources/read), in-process transport.
+      const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
+      await createSousServer().connect(serverSide);
+      await client.connect(clientSide);
+    } else {
+      await client.connect(new StreamableHTTPClientTransport(new URL(this.mcpUrl)));
+    }
     this.tools = (await client.listTools()).tools;
     this.client = client;
     return client;

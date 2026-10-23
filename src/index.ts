@@ -15,7 +15,9 @@ import { SERVER_VERSION, TOOL_NAMES, createSousServer } from './mcp/server.js';
 const PORT = Number(process.env.PORT ?? 8787);
 const HOST = process.env.HOST ?? '0.0.0.0';
 const MCP_PATH = '/mcp';
-const SELF_MCP_URL = process.env.SOUS_MCP_URL ?? `http://127.0.0.1:${PORT}${MCP_PATH}`;
+const SELF_MCP_URL = process.env.SOUS_MCP_URL ?? (process.env.VERCEL ? 'memory' : `http://127.0.0.1:${PORT}${MCP_PATH}`);
+// Stateless Streamable HTTP (a fresh server per POST) suits serverless hosts where requests may hit any instance.
+const STATELESS = process.env.MCP_STATELESS === 'true' || Boolean(process.env.VERCEL);
 const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS ?? '').split(',').map(h => h.trim()).filter(Boolean);
 const SESSION_TTL_MS = 60 * 60 * 1000;
 
@@ -43,6 +45,19 @@ export function createApp() {
     res.status(status).json({ jsonrpc: '2.0', error: { code, message }, id: null });
 
   app.post(MCP_PATH, async (req: Request, res: Response) => {
+    if (STATELESS) {
+      try {
+        const server = createSousServer();
+        const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true, ...security });
+        res.on('close', () => { void transport.close(); void server.close(); });
+        await server.connect(transport);
+        await transport.handleRequest(req, res, req.body);
+      } catch (err) {
+        console.error('[mcp] stateless request failed', err);
+        if (!res.headersSent) rpcError(res, 500, -32603, 'Internal error');
+      }
+      return;
+    }
     const sid = req.header('mcp-session-id');
     try {
       if (sid) {
@@ -71,6 +86,7 @@ export function createApp() {
 
   // GET opens the server-to-client SSE stream; DELETE ends the session.
   const bySession = async (req: Request, res: Response) => {
+    if (STATELESS) return rpcError(res, 405, -32000, 'Method not allowed in stateless mode');
     const sid = req.header('mcp-session-id');
     const s = sid ? sessions.get(sid) : undefined;
     if (!s) return rpcError(res, sid ? 404 : 400, -32001, sid ? 'Session not found' : 'Missing Mcp-Session-Id');
@@ -121,7 +137,7 @@ export function createApp() {
     res.json({ ok: true });
   });
 
-  app.get('/healthz', (_req, res) => res.json({ ok: true, name: 'sous', version: SERVER_VERSION, protocol: LATEST_PROTOCOL_VERSION, transport: 'streamable-http', mcp: MCP_PATH, tools: TOOL_NAMES().length, bedrock: bedrockStatus() }));
+  app.get('/healthz', (_req, res) => res.json({ ok: true, name: 'sous', version: SERVER_VERSION, protocol: LATEST_PROTOCOL_VERSION, transport: 'streamable-http', mode: STATELESS ? 'stateless' : 'sessions', mcp: MCP_PATH, tools: TOOL_NAMES().length, bedrock: bedrockStatus() }));
 
   // ---------- web: landing page and the Echo Show simulator ----------
   const web = resolve('web');
