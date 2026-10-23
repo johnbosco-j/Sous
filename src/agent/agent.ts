@@ -264,15 +264,20 @@ function normalizeHistory(h: Message[]): Message[] {
   return out.slice(-14);
 }
 
-/** Bedrock tool schemas: plain JSON Schema objects without meta keys. */
+// Bedrock models accept different JSON Schema subsets; keep the portable core. Sous validates the full schema anyway.
+const SCHEMA_KEYS = new Set(['type', 'properties', 'required', 'description', 'enum', 'items']);
+
 function sanitizeSchema(schema: unknown): unknown {
   if (Array.isArray(schema)) return schema.map(sanitizeSchema);
   if (!schema || typeof schema !== 'object') return schema;
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(schema)) {
-    if (k === '$schema' || k === 'additionalProperties') continue;
-    out[k] = sanitizeSchema(v);
+    if (!SCHEMA_KEYS.has(k)) continue;
+    out[k] = k === 'properties'
+      ? Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([p, s]) => [p, sanitizeSchema(s)]))
+      : sanitizeSchema(v);
   }
+  if (out.type === 'object' && !out.properties) out.properties = {};
   return out;
 }
 
