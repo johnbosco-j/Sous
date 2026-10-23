@@ -114,3 +114,24 @@ describe('voice router', () => {
     expect(route('next step', { cooking: true, lastSuggestions: [] })).toEqual({ tool: 'cook_step', args: { action: 'next' } });
   });
 });
+
+describe('small talk', async () => {
+  const { smallTalk, fallback } = await import('../src/agent/smalltalk.js');
+  const ctx = { hour: 19, atRisk: [{ name: 'baby spinach', expiresInDays: 1 }], cooking: null, pendingPrompt: null, plan: [], cart: null, householdName: 'x' };
+  it.each(['hello', 'Hi', 'Alexa, how are you?', 'thanks', 'what can you do', 'bye', 'tell me a joke'])('answers "%s" without a canned fallback', text => {
+    const out = smallTalk(text, ctx);
+    expect(out).toBeTruthy();
+    expect(out).not.toMatch(/^I can plan dinner around/);
+  });
+  it('greets with what is about to expire', () => {
+    expect(smallTalk('hello', ctx)).toMatch(/baby spinach expires tomorrow/);
+    expect(smallTalk('good evening', ctx)).toMatch(/^Good evening/);
+    expect(smallTalk('hi', { ...ctx, atRisk: [{ name: 'ripe bananas', expiresInDays: 1 }] })).toMatch(/ripe bananas expire tomorrow.*use them up/);
+  });
+  it('leaves kitchen requests to the router', () => {
+    expect(smallTalk('what should we cook tonight', ctx)).toBeNull();
+  });
+  it('echoes unknown requests with a contextual hint', () => {
+    expect(fallback('book me a flight', ctx)).toMatch(/"book me a flight".*baby spinach/);
+  });
+});

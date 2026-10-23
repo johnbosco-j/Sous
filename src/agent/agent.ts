@@ -8,6 +8,9 @@ import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { bedrockAvailable, converse } from '../aws/bedrock.js';
 import { activeTimers, getState, Timer } from '../domain/store.js';
 import { NO, PLAN_WEEK, YES, route } from './rules.js';
+import { TalkContext, fallback, smallTalk } from './smalltalk.js';
+import { pantryView, cartView } from '../domain/kitchen.js';
+import { RECIPE_BY_ID } from '../domain/catalog.js';
 
 // The Alexa+ stand-in. It talks to Sous exactly like Alexa+ would: as an MCP client over Streamable HTTP.
 // Brain: Amazon Bedrock (Converse + tool use) when credentials exist, else the deterministic router.
@@ -168,10 +171,32 @@ class AgentSession {
     return { ...this.respond(turn, 'rules'), result: turn.lastResult };
   }
 
+  private talkContext(): TalkContext {
+    const s = getState();
+    const cooking = s.cooking && RECIPE_BY_ID.get(s.cooking.recipeId);
+    const cart = this.lastCartToken ? s.carts[this.lastCartToken] : Object.values(s.carts).at(-1);
+    const cv = cart ? cartView(s, cart) : null;
+    return {
+      hour: new Date().getHours(),
+      atRisk: pantryView(s).filter(p => p.expiresInDays !== null && p.expiresInDays >= 0 && p.expiresInDays <= 2).map(p => ({ name: p.name, expiresInDays: p.expiresInDays as number })),
+      cooking: cooking ? { title: cooking.title, step: s.cooking!.stepIndex + 1, total: cooking.steps.length } : null,
+      pendingPrompt: this.pending?.prompt ?? null,
+      plan: s.plan.map(p => RECIPE_BY_ID.get(p.recipeId)?.title).filter((x): x is string => Boolean(x)),
+      cart: cv && cv.lines.length ? { items: cv.lines.length, totalUsd: cv.totalUsd, placed: cv.status === 'placed' } : null,
+      householdName: s.household.name
+    };
+  }
+
   private async rulesTurn(text: string, turn: Turn) {
+    const ctx = this.talkContext();
+    const chat = smallTalk(text, ctx);
+    if (chat) {
+      turn.lastSpeech = chat;
+      return;
+    }
     const r = route(text, { cooking: Boolean(getState().cooking), lastSuggestions: [] });
     if ('speech' in r) {
-      turn.lastSpeech = r.speech;
+      turn.lastSpeech = fallback(text, ctx);
       return;
     }
     if (r.tool === PLAN_WEEK) return this.planWeek(turn);
