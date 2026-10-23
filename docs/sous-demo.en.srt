@@ -4,129 +4,138 @@ Every evening, in millions of kitchens,
 the same question… what's for dinner?
 
 2
-00:00:06,600 --> 00:00:11,750
-This is Sous, a zero-waste kitchen agent
-for Alexa+.
+00:00:06,580 --> 00:00:10,902
+This is Sous, keeping everyone at the
+table safe.
 
 3
-00:00:11,800 --> 00:00:16,182
-Up to 40% of America's food is wasted…
+00:00:11,800 --> 00:00:20,545
+Up to 40% of America's food is wasted… and
+1 in 13 kids has a food allergy.
 
 4
-00:00:16,222 --> 00:00:20,997
-and most of it dies quietly, in our own
-fridges.
+00:00:23,200 --> 00:00:26,677
+Tell Sous once: Grandpa needs low sodium…
 
 5
-00:00:22,700 --> 00:00:27,372
-So we ask… Alexa, what should we cook
-tonight?
+00:00:26,717 --> 00:00:31,040
+and it applies to every meal from now on.
 
 6
-00:00:27,600 --> 00:00:31,632
-Sous ranks recipes by the expiring food
-they rescue.
+00:00:32,300 --> 00:00:37,237
+What should we cook tonight? Recipes
+ranked by what expires first.
 
 7
-00:00:31,672 --> 00:00:36,900
-Peanut noodles never appear. Leo's
-allergic, so it's blocked in code.
+00:00:37,277 --> 00:00:43,307
+Peanut noodles out for Leo… salty fried
+rice set aside for Grandpa.
 
 8
-00:00:37,600 --> 00:00:45,440
-What's about to expire? The pantry, sorted
-by urgency… $23 of food at risk.
+00:00:44,500 --> 00:00:47,525
+Out of eggs? Sous suggests swaps…
 
 9
-00:00:46,500 --> 00:00:50,430
-Tell it once that Ava doesn't like
-mushrooms…
+00:00:47,565 --> 00:00:52,792
+and drops any that clash with an allergy
+at the table.
 
 10
-00:00:50,470 --> 00:00:53,887
-and Sous remembers it, for every meal.
+00:00:53,300 --> 00:00:56,717
+Plan dinners for the next three nights.
 
 11
-00:00:54,000 --> 00:00:58,450
-A bigger ask: plan dinners for the next
-three nights.
-
-12
-00:00:58,500 --> 00:01:05,597
+00:00:59,000 --> 00:01:06,387
 One sentence, three MCP tool calls…
 suggest, save the plan, build the cart.
 
+12
+00:01:07,400 --> 00:01:14,335
+Nothing is bought until I say yes… and the
+order goes through exactly once.
+
 13
-00:01:05,637 --> 00:01:08,150
-All in the live trace.
-
-14
-00:01:08,700 --> 00:01:11,827
-Nothing is bought until I say yes.
-
-15
-00:01:11,867 --> 00:01:17,095
-One-time cart token, so the order goes
-through exactly once.
-
-16
-00:01:17,600 --> 00:01:24,185
-Now we cook, hands-free. Every step, big
+00:01:15,600 --> 00:01:22,185
+Now we cook, hands-free, every step big
 enough to read across the room.
 
-17
-00:01:26,400 --> 00:01:32,882
+14
+00:01:24,000 --> 00:01:28,322
 When a step needs time, Sous offers a
-timer… I just say yes.
+timer.
 
-18
-00:01:33,600 --> 00:01:37,982
-My hands are busy, so I tap Next instead…
+15
+00:01:30,300 --> 00:01:38,140
+Hands busy? I tap Next instead… voice and
+touch call the same MCP tools.
 
-19
-00:01:38,022 --> 00:01:42,797
-voice and touch call the same MCP tools.
-
-20
-00:01:44,300 --> 00:01:48,170
+16
+00:01:38,600 --> 00:01:42,470
 Every step stays on screen, ingredients
 ticked off.
 
+17
+00:01:43,800 --> 00:01:49,260
+Dinner's ready… $6.79 of food, saved from
+the bin.
+
+18
+00:01:49,300 --> 00:01:52,162
+Then… Leo's lips start swelling.
+
+19
+00:01:52,410 --> 00:01:53,727
+Sous doesn't guess.
+
+20
+00:01:53,767 --> 00:02:00,412
+A fixed script, checked before anything
+else: call 911, use his epinephrine…
+
 21
-00:01:48,700 --> 00:01:54,832
-Dinner's ready. Sous logged $6.79 of food,
-saved from the bin.
+00:02:00,452 --> 00:02:01,652
+don't wait.
 
 22
-00:01:55,700 --> 00:02:00,082
-Out of ideas? Sous can improvise with
-Amazon Bedrock…
+00:02:01,900 --> 00:02:03,670
+On a tight budget?
 
 23
-00:02:00,122 --> 00:02:03,540
-and the allergen guard checks every idea.
+00:02:03,710 --> 00:02:08,997
+Sous finds the cheapest use-it-up dinners,
+priced per serving…
 
 24
-00:02:04,400 --> 00:02:13,145
-$22 rescued this week, 9 kg of CO₂… over
-$1,000 a year.
+00:02:09,037 --> 00:02:11,097
+tonight's costs nothing extra.
 
 25
-00:02:14,000 --> 00:02:18,672
-Now, a brand-new session. New
-conversation… same household.
+00:02:12,200 --> 00:02:17,325
+And what we won't use goes to a community
+fridge…
 
 26
-00:02:18,800 --> 00:02:22,832
-Sous still knows Leo's peanut allergy, and
-Ava's mushrooms.
+00:02:19,600 --> 00:02:24,375
+only after a yes, and it counts as food
+rescued.
 
 27
-00:02:22,872 --> 00:02:25,385
-That's real memory, across sessions.
+00:02:26,000 --> 00:02:35,197
+$25 rescued this week, nearly 11 kg of CO₂
+avoided… $1,300 a year.
 
 28
-00:02:26,200 --> 00:02:30,872
-Sous. Less waste… better dinners. Built
-for Alexa+.
+00:02:36,300 --> 00:02:42,492
+A brand-new session… and Sous still
+remembers Leo's allergy and Grandpa's
+diet.
+
+29
+00:02:42,532 --> 00:02:45,045
+That's real memory, across sessions.
+
+30
+00:02:47,300 --> 00:02:51,972
+Sous. Less waste… and everyone at the
+table, safe.
 

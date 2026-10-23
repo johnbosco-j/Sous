@@ -45,7 +45,7 @@ Dinner is a safety decision, a money decision and a waste decision, made every d
 | Agentic workflow across services | "Plan the next three nights" chains planner → plan → grocery cart; Bedrock decides the chain itself |
 | Context and state across sessions | Household memory (allergies, dislikes, notes), pantry, plan, cook progress and impact persist in `data/kitchen.json` |
 | Purchasing | Draft cart with a `cartToken`; checkout needs explicit confirmation; idempotent replays; 30-minute cart expiry |
-| Media support: cards and carousels | Five MCP Apps views: recipe carousel, cook-along, cart/receipt, pantry and impact chart |
+| Media support: cards and carousels | Six MCP Apps views: recipe carousel, cook-along, cart/receipt, pantry, impact chart, and a full-screen allergy emergency alert |
 | MCP Apps | Tools link `ui://sous/*.html` (`text/html;profile=mcp-app`) via `_meta.ui.resourceUri`; views call tools back on tap |
 | Agent Skills | [`skills/sous-kitchen/SKILL.md`](skills/sous-kitchen/SKILL.md) teaches any agent the voice contract and workflows |
 | Safety in code, not prompts | Allergy-emergency red flag with a fixed 911 / epinephrine script; allergen and diet guards on every recipe, substitute and scanned label; food safety that never says "safe" |
@@ -80,7 +80,7 @@ flowchart LR
 | Transport | **Streamable HTTP** on `POST/GET/DELETE /mcp` with `Mcp-Session-Id` sessions; optional DNS-rebinding protection (`ALLOWED_HOSTS`) |
 | Capabilities | 44 tools, 8 resources + 1 template, 2 prompts, server `instructions` |
 | Every tool has | `title`, `icons` (2025-11-25), behavior `annotations`, a JSON Schema `inputSchema` (from Zod), a shared `outputSchema`, and returns `structuredContent` plus a voice-ready text block |
-| MCP Apps | `ui://sous/{meals,cook,cart,pantry,impact}.html`, mime `text/html;profile=mcp-app`, `_meta.ui.csp` for fonts |
+| MCP Apps | `ui://sous/{meals,cook,cart,pantry,impact,alert}.html`, mime `text/html;profile=mcp-app`, `_meta.ui.csp` for fonts |
 
 ### Tools (44)
 
@@ -94,7 +94,7 @@ flowchart LR
 
 Every tool has a `title`, `icons`, behavior `annotations` (`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`), a JSON Schema `inputSchema`, the shared `outputSchema`, and returns `structuredContent` plus a voice-ready text block. Tool modules live in `src/mcp/tools/` and register through `src/mcp/registry.ts`.
 
-Resources: `sous://household`, `sous://pantry`, `sous://impact`, `sous://recipe/{id}` and the five `ui://` views.
+Resources: `sous://household`, `sous://pantry`, `sous://impact`, `sous://recipe/{id}` and the six `ui://` views.
 Prompts: `plan_tonight`, `use_it_up_week`.
 
 ### The voice contract
