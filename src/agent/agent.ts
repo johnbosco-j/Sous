@@ -15,7 +15,7 @@ export interface AgentResponse {
   speech: string;
   engine: 'bedrock' | 'rules';
   toolCalls: ToolCallTrace[];
-  ui: null | { resourceUri: string; html: string; toolResult: CallToolResult };
+  ui: null | { resourceUri: string; html: string; toolInput: Record<string, unknown>; toolResult: CallToolResult };
   timers: Timer[];
   sessionId: string;
 }
@@ -50,7 +50,11 @@ class AgentSession {
 
   private async connect(): Promise<Client> {
     if (this.client) return this.client;
-    const client = new Client({ name: 'sous-alexa-plus-simulator', version: '1.0.0' });
+    // Advertise MCP Apps support (extension io.modelcontextprotocol/ui), like a screen-equipped Alexa+ host.
+    const client = new Client(
+      { name: 'sous-alexa-plus-simulator', version: '1.0.0' },
+      { capabilities: { extensions: { 'io.modelcontextprotocol/ui': { mimeTypes: ['text/html;profile=mcp-app'] } } } as any }
+    );
     const transport = new StreamableHTTPClientTransport(new URL(this.mcpUrl));
     await client.connect(transport);
     this.tools = (await client.listTools()).tools;
@@ -98,7 +102,7 @@ class AgentSession {
     if (sc?.tool === 'shopping_cart_build' && sc.data?.cartToken) this.lastCartToken = sc.data.cartToken;
     if (sc?.tool === 'shopping_checkout' && sc.data?.status === 'placed') this.lastCartToken = null;
     const uri = this.resourceUriFor(name);
-    if (uri && sc?.view) turn.ui = { resourceUri: uri, html: await this.html(uri), toolResult: result };
+    if (uri && sc?.view) turn.ui = { resourceUri: uri, html: await this.html(uri), toolInput: args, toolResult: result };
     turn.lastSpeech = sc?.speech ?? (result.content?.[0] as { text?: string })?.text ?? turn.lastSpeech;
     return result;
   }

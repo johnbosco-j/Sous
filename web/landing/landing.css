@@ -373,7 +373,7 @@ section { position: relative; }
 .dg-wire { fill: none; stroke: rgba(247, 239, 228, .22); stroke-width: 2; stroke-dasharray: 6 8; animation: dash 1.4s linear infinite; }
 .dg-wire.cy { stroke: rgba(47, 216, 255, .6); }
 .dg-wire.sf { stroke: rgba(245, 165, 36, .6); }
-.dg-packet { filter: drop-shadow(0 0 6px currentColor); }
+.dg-packet { stroke: currentColor; stroke-width: 9; stroke-opacity: .22; }
 .steps { list-style: none; padding: 0; margin: 44px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; counter-reset: s; }
 .steps li { position: relative; padding: 22px 22px 22px 22px; border-radius: 18px; border: 1px solid var(--line); background: rgba(247, 239, 228, .02); color: var(--ink-2); font-size: 15.5px; }
 .steps li::before { counter-increment: s; content: "0" counter(s); display: block; margin-bottom: 10px; font-family: var(--display); font-size: 34px; font-weight: 700; color: var(--saffron); line-height: 1; }
@@ -505,6 +505,8 @@ footer p { margin: 8px 0 0; max-width: 60ch; }
   .stats, .grid, .steps { grid-template-columns: 1fr; }
   .card.wide { grid-column: auto; }
   .hero-actions .btn { width: 100%; }
+  .eyebrow { font-size: 11px; letter-spacing: .04em; padding: 7px 12px; }
+  .hero-content { padding-top: 50vh; }
   .bubble { max-width: 96%; }
   .built-row { flex-direction: column; align-items: flex-start; }
   .scroll-cue { display: none; }

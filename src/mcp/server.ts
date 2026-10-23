@@ -584,7 +584,8 @@ export async function callTool(name: string, args: unknown): Promise<CallToolRes
   }
   try {
     const out = await t.handler(parsed.data);
-    return { content: [{ type: 'text', text: out.speech }], structuredContent: out as unknown as Record<string, unknown> };
+    // A refused or impossible request is a tool-level error with a spoken recovery line, never a dead end.
+    return { content: [{ type: 'text', text: out.speech }], structuredContent: out as unknown as Record<string, unknown>, ...(out.ok ? {} : { isError: true }) };
   } catch (err) {
     return { content: [{ type: 'text', text: `Sous hit an error in ${name}: ${(err as Error).message}` }], isError: true };
   }

@@ -18,7 +18,7 @@
     { "match": "\\bnext\\b|continue|done with that", "key": "@next" },
     { "match": "\\bback\\b|previous", "key": "@back" },
     { "match": "timer", "key": "timer" },
-    { "match": "cart|missing|shopping|buy", "key": "cart" },
+    { "match": "cart|missing|shopping|buy|plan dinners|next three", "key": "cart" },
     { "match": "\\byes\\b|place the order|confirm|go ahead", "key": "order" },
     { "match": "saved|impact|how much food|rescued", "key": "impact" },
     { "match": "cook|dinner|eat|meal|tonight", "key": "meals" }

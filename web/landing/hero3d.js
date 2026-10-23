@@ -207,7 +207,7 @@ async function init() {
     obj.rotation.set(rand() * 6, rand() * 6, rand() * 6);
     orbiters.push({
       holder, obj,
-      radius: 3.7 + rand() * 2.6,
+      radius: 3.6 + rand() * 2.1,
       angle: (i / N) * Math.PI * 2 + rand() * 0.4,
       speed: 0.07 + rand() * 0.07,
       incline: (rand() - 0.5) * 0.9,
@@ -241,7 +241,7 @@ async function init() {
     if (w / h > 1.05) {
       Object.assign(base, { x: Math.min(3.4, 1.4 + (w / h) * 1.15), y: 0.1, s: 1 });
     } else {
-      Object.assign(base, { x: 0, y: 2.35, s: 0.62 });
+      Object.assign(base, { x: 0, y: 2.25, s: 0.46 });
     }
     world.scale.setScalar(base.s);
   }
