@@ -102,3 +102,21 @@ Every entry below happened while building Sous on 23 Oct 2026, or can be checked
 - **Severity:** Medium on deadline day.
 - **Workaround:** Installed the GitHub App on the repository.
 - **Suggestion (for the hackathon checklist):** Remind builders who use AI coding agents to grant repo access *before* deadline day, alongside the existing "add collaborators" reminder.
+
+### F11: Hosting a Streamable HTTP MCP server on serverless (Alexa+ needs a public HTTPS endpoint)
+- **Task:** Give judges, and Alexa+, a public HTTPS MCP endpoint by deploying Sous to a serverless host (Vercel).
+- **Steps:**
+  1. Deployed the same Express app that runs locally with stateful Streamable HTTP. That mode keeps an in-memory session map keyed by `Mcp-Session-Id`.
+  2. Read the SDK transport options.
+  3. Switched to the stateless mode (`sessionIdGenerator: undefined`, a fresh server per POST, JSON responses).
+  4. Moved the simulator's agent from a self-HTTP connection to the SDK's in-memory transport.
+- **Expected:** One recommended hosting pattern for Alexa+ add-ons, telling you whether Alexa+ keeps `Mcp-Session-Id` sessions and whether stateless servers are fine.
+- **Actual:** Stateful sessions can't be relied on when requests can land on different serverless instances. The Alexa+ docs we could reach say Streamable HTTP is required, but not which session behavior Alexa+ expects from the server.
+- **Severity:** Medium.
+- **Workaround:**
+  - Stateless Streamable HTTP on Vercel (`/healthz` reports `mode: stateless`), with sessions kept for local runs.
+  - Demo state persists per instance in `/tmp`.
+- **Suggestion:** Add a "hosting your MCP add-on" page covering:
+  - stateful vs. stateless Streamable HTTP;
+  - whether Alexa+ resumes sessions;
+  - a reference deployment on AWS Lambda or App Runner with a durable session store such as DynamoDB.

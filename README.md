@@ -1,10 +1,13 @@
-# Sous: the zero-waste kitchen agent for Alexa+
+# Sous: the kitchen agent for Alexa+ that keeps everyone at the table safe and fed
 
-**Sous** is a self-hosted **MCP server** (spec **2025-11-25**, **Streamable HTTP**) that gives Alexa+ a kitchen brain:
-it plans dinner around the food that is about to expire, keeps allergies safe in code, orders exactly what is missing
-(only after you say yes), and cooks with you hands-free, step by step, with timers. On an Echo Show it renders rich,
-tappable cards through **MCP Apps**. It ships with an **Alexa+ / Echo Show simulator** whose agent is driven by
-**Amazon Bedrock** (Converse API with tool use) over a real MCP connection.
+**Sous** is a self-hosted **MCP server** (spec **2025-11-25**, **Streamable HTTP**, 44 tools, 253 tests) that gives Alexa+ a kitchen brain for the whole family:
+- It plans dinner around the food that is about to expire.
+- It keeps a child's food allergy and a grandparent's low-sodium diet out of every recipe, enforced in code.
+- If someone describes a severe allergic reaction, it gives a fixed emergency script.
+- It keeps the grocery budget, and orders exactly what is missing only after you say yes.
+- It cooks with you hands-free, step by step, with timers.
+
+On an Echo Show it renders rich, tappable cards through **MCP Apps**. It ships with an **Alexa+ / Echo Show simulator** whose agent is driven by **Amazon Bedrock** (Converse API with tool use) over a real MCP connection.
 
 > Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, Alexa+ track (+ AWS Builder mini challenge).
 > All household and pantry data is synthetic. Orders go to a simulated Amazon Fresh store; nothing is purchased.
@@ -15,11 +18,13 @@ tappable cards through **MCP Apps**. It ships with an **Alexa+ / Echo Show simul
 
 ## Why
 
-Households throw away a large share of the food they buy, and the typical family loses well over a thousand dollars a year to it
-(see the cited figures on the landing page and in [docs/SUBMISSION.md](docs/SUBMISSION.md)). The waste happens at one moment, every day:
-*"What's for dinner?"* is answered from habit, not from what is about to go off. The kitchen is also where Alexa lives,
-where hands are wet and busy, and where screens like Echo Show sit. Sous answers that question from the pantry's expiry dates,
-then carries the whole job through: plan → shop → cook → measure.
+Dinner is a safety decision, a money decision and a waste decision, made every day with your hands full.
+- More than **33 million people in the US have a food allergy, about 1 in 13 children** ([FARE](https://www.foodallergy.org/resources/national-indicator-report-food-allergy)).
+- **71.6% of adults 60 and older have high blood pressure** ([CDC NCHS Data Brief 511](https://www.cdc.gov/nchs/products/databriefs/db511.htm)).
+- **13.5% of US households were food insecure at some point in 2023** ([USDA ERS](https://ers.usda.gov/sites/default/files/_laserfiche/publications/109896/ERR-337.pdf)).
+- Meanwhile **30–40% of the US food supply is wasted** (USDA).
+
+*"What's for dinner?"* is answered from habit, not from what is about to go off, who can't eat what, or what's left in the budget. The kitchen is also where Alexa lives: hands are wet and busy, and screens like Echo Show sit on the counter. Sous answers that question from the pantry's expiry dates and the family's needs, then carries the whole job through: plan → check it's safe for everyone → shop → cook → measure.
 
 ```
 "Alexa, what should we cook tonight?"
@@ -43,6 +48,7 @@ then carries the whole job through: plan → shop → cook → measure.
 | Media support: cards and carousels | Five MCP Apps views: recipe carousel, cook-along, cart/receipt, pantry and impact chart |
 | MCP Apps | Tools link `ui://sous/*.html` (`text/html;profile=mcp-app`) via `_meta.ui.resourceUri`; views call tools back on tap |
 | Agent Skills | [`skills/sous-kitchen/SKILL.md`](skills/sous-kitchen/SKILL.md) teaches any agent the voice contract and workflows |
+| Safety in code, not prompts | Allergy-emergency red flag with a fixed 911 / epinephrine script; allergen and diet guards on every recipe, substitute and scanned label; food safety that never says "safe" |
 
 ## Architecture
 
@@ -72,26 +78,21 @@ flowchart LR
 | SDK | `@modelcontextprotocol/sdk` 1.32 (TypeScript), low-level `Server` |
 | Protocol | **2025-11-25** (negotiated) |
 | Transport | **Streamable HTTP** on `POST/GET/DELETE /mcp` with `Mcp-Session-Id` sessions; optional DNS-rebinding protection (`ALLOWED_HOSTS`) |
-| Capabilities | 12 tools, 8 resources + 1 template, 2 prompts, server `instructions` |
+| Capabilities | 44 tools, 8 resources + 1 template, 2 prompts, server `instructions` |
 | Every tool has | `title`, `icons` (2025-11-25), behavior `annotations`, a JSON Schema `inputSchema` (from Zod), a shared `outputSchema`, and returns `structuredContent` plus a voice-ready text block |
 | MCP Apps | `ui://sous/{meals,cook,cart,pantry,impact}.html`, mime `text/html;profile=mcp-app`, `_meta.ui.csp` for fonts |
 
-### Tools
+### Tools (44)
 
-| Tool | What it does | Annotations |
-| --- | --- | --- |
-| `pantry_check` | Soonest-expiring first, dollar value at risk; "do we have eggs?" | read-only |
-| `pantry_update` | "We bought a dozen eggs", "we're out of milk", "I used two tomatoes" | |
-| `meal_suggest` | Use-it-up ranking (expiry urgency × share of stock rescued − missing items − time); allergen and dislike exclusions with reasons | read-only |
-| `chef_improvise` | **Amazon Bedrock** invents a recipe around at-risk food; output re-checked by the allergen guard; template fallback | open-world |
-| `meal_plan_set` | Save the next nights' dinners | idempotent |
-| `shopping_cart_build` | Diff plan vs pantry → draft Amazon Fresh (simulated) cart with `cartToken` | |
-| `shopping_checkout` | Places the order only with `cartToken` + `confirmed: true`; idempotent on replay | open-world, idempotent |
-| `cook_start` | Hands-free cook mode ("cook the first one") | |
-| `cook_step` | next / back / repeat / ingredients / finish; finishing logs the food rescued | |
-| `timer_set` | Named kitchen timers; defaults to the current step's time | |
-| `household_memory` | Remember/forget allergies (hard rule), dislikes, notes, across sessions | idempotent |
-| `impact_report` | Dollars, kg and CO2e rescued this week, 7-day chart, yearly projection | read-only |
+| Group | Tools |
+| --- | --- |
+| **Core kitchen** | `pantry_check`, `pantry_update`, `meal_suggest` (use-it-up ranking, allergen/diet/dislike exclusions with reasons), `chef_improvise` (**Amazon Bedrock**, allergen re-check, template fallback), `meal_plan_set`, `shopping_cart_build`, `shopping_checkout` (token + explicit yes, idempotent), `cook_start`, `cook_step`, `timer_set`, `household_memory`, `impact_report` |
+| **Safety for everyone at the table** | `allergy_emergency` (deterministic red flag: fixed "call 911 / use the prescribed epinephrine auto-injector" script, negation-aware), `allergen_scan` (product labels incl. "may contain"), `diet_profile` (per-member low-sodium, diabetes-friendly, vegetarian, soft-foods, dairy-free, gluten-free; filters `meal_suggest`), `meal_safety_check` (per-person verdict), `cross_contact_tips`, `cooking_temp` (USDA safe internal temps), `food_safety_check` (conservative, never says "safe"), `substitute_ingredient` (allergy-aware) |
+| **Budget & community** | `budget_set`, `budget_status`, `budget_meal_plan`, `price_check`, `donate_surplus` (community fridge, simulated), `leftovers_log` (3–4 day window), `leftovers_ideas`, `waste_log`, `waste_insights` |
+| **Planning** | `recipe_search`, `recipe_details` (scaled, allergen check), `meal_plan_get`, `meal_plan_clear`, `unit_convert`, `timer_list`, `timer_cancel`, `cook_status` |
+| **Household** | `household_members`, `pantry_add_receipt`, `daily_brief`, `order_history`, `reorder_staples` (same purchase gate), `delivery_slots`, `shopping_list` (feeds the cart) |
+
+Every tool has a `title`, `icons`, behavior `annotations` (`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`), a JSON Schema `inputSchema`, the shared `outputSchema`, and returns `structuredContent` plus a voice-ready text block. Tool modules live in `src/mcp/tools/` and register through `src/mcp/registry.ts`.
 
 Resources: `sous://household`, `sous://pantry`, `sous://impact`, `sous://recipe/{id}` and the five `ui://` views.
 Prompts: `plan_tonight`, `use_it_up_week`.
@@ -105,6 +106,12 @@ never a dead end.
 
 ## Safety lives in code, not in prompts
 
+- **Allergy-emergency red flag.** `allergy_emergency` matches severe-reaction signs (swelling of lips, tongue or throat; trouble
+  breathing; wheezing; hives after eating), with negation handling. It returns a constant script: call 911, and use the prescribed
+  epinephrine auto-injector as directed. No model writes or edits it.
+- **Diet needs as hard filters.** `diet_profile` plugs into the planner's recipe-filter hook (`src/domain/hooks.ts`).
+- **Food safety without false reassurance.** `food_safety_check` gives dates and conservative windows and never says "safe".
+  `cooking_temp` gives USDA safe minimum internal temperatures.
 - **Allergen guard.** Allergies are hard filters applied to every ranked recipe (`allergenHits`) and to every model-written
   recipe (`allergenHitsInText`, which also catches words like "satay"). A Bedrock idea that mentions an allergen is discarded
   and Sous says so.
@@ -157,7 +164,7 @@ The hosted server runs **stateless Streamable HTTP** on Vercel (a fresh MCP serv
 ### Tests
 
 ```bash
-npm test        # 39 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
+npm test        # 253 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
                 # Streamable HTTP, and the Bedrock tool loop (scripted Converse mock), including a model that tries to buy without consent, and offline small talk
 npm run typecheck
 ```
@@ -166,7 +173,9 @@ npm run typecheck
 
 ```
 src/index.ts            Express app: /mcp (Streamable HTTP), /api/* for the simulator, static web/
-src/mcp/server.ts       MCP tools, resources, prompts, MCP Apps wiring
+src/mcp/server.ts       MCP server: core tools, resources, prompts, MCP Apps wiring
+src/mcp/registry.ts     tool registry shared by the tool modules
+src/mcp/tools/          tool modules: safety, budget, planning, household
 src/domain/             catalog (ingredients, recipes, demo household), store (persistence), kitchen (core logic)
 src/agent/              Alexa+ stand-in: MCP client + Bedrock tool loop + deterministic router
 src/aws/bedrock.ts      Bedrock Converse client, circuit breaker, recipe improviser

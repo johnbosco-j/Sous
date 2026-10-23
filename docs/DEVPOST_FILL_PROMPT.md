@@ -19,7 +19,7 @@ Steps:
 
 2. PROJECT OVERVIEW
    - Project name: Sous
-   - Elevator pitch (max 200 chars): Alexa+ kitchen agent that plans dinner around food about to expire, blocks allergens in code, orders only after you say yes, and cooks with you hands-free on Echo Show.
+   - Elevator pitch (max 200 chars): Alexa+ kitchen agent that keeps everyone at the table safe and fed: dinner from food about to expire, allergy and diet risks blocked in code, groceries ordered only after a yes.
    - Thumbnail: I will upload thumbnail.jpg myself if you cannot upload files; tell me when to do it.
 
 3. PROJECT DETAILS
@@ -29,7 +29,7 @@ Steps:
      What we learned / What's next), put each matching SOURCE A section into its box. For "Accomplishments",
      use the "Safety and trust design" section. For "What we learned", use the "Potential impact" section.
    - "Built with" tags (add each): model-context-protocol, mcp-apps, streamable-http, alexa-plus, amazon-bedrock,
-     aws-sdk-js-v3, typescript, node.js, express, zod, three.js, web-speech-api, vitest, vercel
+     aws-sdk-js-v3, typescript, node.js, express, zod, three.js, web-speech-api, vitest, vercel, food-safety, accessibility
    - "Try it out" links (add each):
        https://sous-alexa.vercel.app/device
        https://sous-alexa.vercel.app

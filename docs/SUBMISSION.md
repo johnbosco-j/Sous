@@ -8,19 +8,25 @@
 **Sous**
 
 ## Tagline / elevator pitch (Devpost limit: 200 chars)
-Alexa+ kitchen agent that plans dinner around food about to expire, blocks allergens in code, orders only after you say yes, and cooks with you hands-free on Echo Show.
+Alexa+ kitchen agent that keeps everyone at the table safe and fed: dinner from food about to expire, allergy and diet risks blocked in code, groceries ordered only after a yes.
 
 ## Short summary (use where a longer summary is allowed)
-Sous is a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) that turns Alexa+ on an Echo Show into a sous-chef for the whole household. "Alexa, what should we cook tonight?" returns a carousel of recipes ranked by how much soon-to-expire food they rescue, with peanut dishes removed because Leo is allergic. From there Sous builds the missing-items cart, places the order only after an explicit "yes", walks you through the recipe step by step with timers, and tracks the dollars and CO2e you saved.
+Sous is a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) that turns Alexa+ on an Echo Show into a kitchen agent for the whole family, built on one promise: **everyone at the table is safe and fed, and good food doesn't go in the bin.** It plans dinner around food that's about to expire. It removes recipes that clash with a child's food allergy or a grandparent's low-sodium diet, in deterministic code. If someone describes a severe allergic reaction, it gives a fixed emergency script. It keeps the weekly grocery budget and orders only after an explicit "yes". It cooks with you hands-free on interactive MCP Apps cards, and it shows the dollars and CO2e you rescued. 44 MCP tools, 253 automated tests, live at https://sous-alexa.vercel.app.
 
 ---
 
 ## About the project (full description)
 
 ### Inspiration
-Every evening the same question is asked in millions of kitchens: *what's for dinner?* We usually answer it while spinach wilts in the fridge. The USDA estimates that **30–40% of the US food supply is wasted**. ReFED's 2025 report puts consumer food waste at **~35 million tons and $261 billion a year, nearly $800 per person**, and surplus food drives roughly **4% of US greenhouse-gas emissions**. Most of that waste is not a moral failure. It is a coordination failure: nobody remembers what's expiring, who is allergic to what, or what to buy so tonight's meal actually uses what you have.
+Dinner is a safety decision, a money decision and a waste decision, made every day around 6 p.m. with your hands full.
 
-The kitchen is where voice belongs, because your hands are covered in flour. Amazon's own Alexa+ add-on design guide names kitchens as a core context: customers "often multitasking, in kitchens, living rooms, and cars." So we built the agent that sits between your fridge and Alexa+.
+- **Food allergies.** More than **33 million people in the US live with a food allergy, about 1 in 13 children** ([FARE National Indicator Report](https://www.foodallergy.org/resources/national-indicator-report-food-allergy)), and FARE reports that a food allergy reaction sends someone to the emergency room **every 10 seconds** ([FARE](https://www.foodallergy.org/)). For those families, one wrong ingredient can mean an emergency room visit.
+- **Older family members' diets.** **47.7% of US adults have high blood pressure, rising to 71.6% of adults 60 and older** ([CDC NCHS Data Brief 511](https://www.cdc.gov/nchs/products/databriefs/db511.htm)). In multigenerational homes, the same pot has to work for a grandparent on a low-sodium diet and a kid who only eats pasta.
+- **Tight budgets, wasted food.** **13.5% of US households, about 18 million, were food insecure at some point in 2023** ([USDA ERS, ERR-337](https://ers.usda.gov/sites/default/files/_laserfiche/publications/109896/ERR-337.pdf)). Meanwhile the USDA estimates that **30–40% of the US food supply is wasted**. ReFED's 2025 report puts consumer food waste at **~35 million tons and $261 billion a year, nearly $800 per person**, and surplus food drives roughly **4% of US greenhouse-gas emissions**.
+
+These are often the same families at the same moment. Nobody can hold in their head what's expiring, who can't eat what, and what's left in the budget while a toddler pulls at their sleeve. That is a coordination failure, not a moral one. Coordination is exactly what an agent with memory and tools is good at.
+
+The kitchen is where voice belongs. Amazon's own Alexa+ add-on design guide names kitchens as a core context, with customers "often multitasking, in kitchens, living rooms, and cars." So we built Sous: the agent between your fridge, your family's needs and Alexa+.
 
 ### What it does
 Sous is an **Alexa+ add-on implemented as a self-hosted MCP server**. Alexa+ (or any MCP client) calls its tools. On screen devices, Sous renders **MCP Apps** views: interactive cards and carousels on the Echo Show.
@@ -40,6 +46,29 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 6. When you finish, the ingredients you used are deducted from the pantry. `impact_report` then shows **dollars rescued, kilograms of food saved, kg CO2e avoided** and a yearly projection.
 7. **"What can I make with yogurt, peppers and tortillas?"** `chef_improvise` asks **Amazon Bedrock** for a new recipe. A *deterministic* allergen guard checks the generated recipe before it is shown. If it contains an allergen, it is rejected.
 
+**Safety for every person at the table**
+- **"Leo's lips are swelling after dinner."** `allergy_emergency` recognizes signs of a severe allergic reaction: swelling of the lips, tongue or throat, trouble breathing, wheezing, or hives after eating. It handles negations such as "no trouble breathing". It answers with a **fixed script written in code, never by a model**: call 911 now, and use the prescribed epinephrine auto-injector as directed. Milder signs get a fixed "watch closely; if there's any swelling or trouble breathing, call 911" line. Sous does not diagnose or reassure, and every incident is logged for the family.
+- **"Does this granola have anything Leo can't eat?"** `allergen_scan` reads a product's ingredient label, including "may contain" and shared-facility warnings, and names the household member it affects.
+- **"Grandpa needs low-sodium meals."** `diet_profile` stores per-member diet needs (low-sodium, diabetes-friendly, vegetarian, soft-foods, dairy-free, gluten-free) across sessions. From then on `meal_suggest` sets aside recipes that clash, with the reason shown.
+- **Other safety tools:**
+  - `meal_safety_check` gives a per-person verdict for any recipe, covering allergens, diet and dislikes.
+  - `cross_contact_tips` explains how to keep a meal allergy-safe: separate boards and utensils, cook the allergy-safe dish first, and re-read labels.
+  - `cooking_temp` gives USDA safe minimum internal temperatures, for example poultry at 165°F (74°C).
+  - `food_safety_check` gives conservative storage windows and never declares food "safe".
+  - `substitute_ingredient` only offers swaps that avoid every household allergen.
+
+**Budget and community**
+- `budget_set` and `budget_status` track a weekly grocery budget against placed orders. `budget_meal_plan` picks use-it-up dinners that fit it, and `price_check` answers "how much is feta?".
+- `leftovers_log` tracks cooked leftovers against the USDA 3–4 day window, and `leftovers_ideas` turns them into tomorrow's lunch.
+- `donate_surplus` finds food you won't get to before it expires and prepares a hand-off to a community fridge (simulated listings in this build), so it feeds a neighbor instead of the bin.
+- `waste_log` and `waste_insights` keep the impact numbers honest: what still went in the bin, and which categories you waste most.
+
+**Planning and household helpers**
+- **Recipes and plans:** `recipe_search`, `recipe_details` (scaled servings plus an allergen check), `meal_plan_get` and `meal_plan_clear`.
+- **Cooking:** `unit_convert`, `timer_list`, `timer_cancel` and `cook_status`.
+- **Shopping:** `shopping_list` (it feeds the cart), `order_history`, `reorder_staples` (through the same purchase gate) and `delivery_slots`.
+- **Household:** `household_members`, `pantry_add_receipt` (paste a receipt and the pantry updates) and `daily_brief` (what to use today).
+
 ### How it works (architecture)
 ```
  Voice / touch
@@ -48,7 +77,7 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
      │  MCP 2025-11-25 over Streamable HTTP (POST/GET/DELETE /mcp, Mcp-Session-Id)
      ▼
  Sous MCP server (Node.js + TypeScript, @modelcontextprotocol/sdk)
-   ├─ tools (pantry, meals, cart, checkout, cook, timers, memory, impact, improvise)
+   ├─ 44 tools in modules: core kitchen · safety (allergy emergency, labels, diets, temps) · budget & community · planning · household
    ├─ ui:// resources (MCP Apps, text/html;profile=mcp-app) → Echo Show cards & carousels
    ├─ deterministic guards: allergen filter, purchase confirmation token, quantity/unit sanity
    └─ household state persisted to disk (state across sessions)
@@ -56,7 +85,7 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 
 **MCP implementation details**
 - **Protocol 2025-11-25** over **Streamable HTTP**, with session management through `Mcp-Session-Id`.
-- All 12 tools declare a `title`, a Zod-generated `inputSchema`, an **`outputSchema`**, **icons** (new in 2025-11-25, SEP-973), and behavior **annotations**:
+- All 44 tools declare a `title`, a Zod-generated `inputSchema`, an **`outputSchema`**, **icons** (new in 2025-11-25, SEP-973), and behavior **annotations**:
   - `pantry_check`, `meal_suggest` and `impact_report` are `readOnlyHint`;
   - `shopping_checkout` is `openWorldHint` + `idempotentHint`, because replaying a token never orders twice;
   - `chef_improvise` is `openWorldHint`, because it calls Bedrock.
@@ -73,23 +102,51 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 - With no AWS credentials, a deterministic intent router takes over, so the demo runs anywhere.
 
 ### Safety and trust design
-These rules live in deterministic code, not in the prompt.
-- **Allergen guard.** Recipes containing a household member's allergen are excluded before ranking, and the reason is shown ("Leo is allergic to peanuts"). LLM-generated recipes from `chef_improvise` pass through the same guard before they are shown.
-- **Confirm-before-buy, enforced twice.**
+These rules live in deterministic, tested code, not in a prompt. A model can phrase things, but it cannot override them.
+- **Allergy-emergency red flag.** `allergy_emergency` matches the signs of a severe reaction, with negation handling. It returns a fixed escalation script: call 911, and use the prescribed epinephrine auto-injector as directed. The text is a constant in code, so no model writes it, and the server `instructions` tell Alexa to speak it as written.
+- **Allergen guard everywhere.** Recipes containing a household member's allergen are excluded before ranking, and the reason is shown ("Leo is allergic to peanuts"). The same guard runs on:
+  - LLM-generated recipes from `chef_improvise`;
+  - substitutes;
+  - scanned product labels (`allergen_scan`), including "may contain" warnings.
+- **Diet needs as hard filters.** `diet_profile` plugs into the planner through a recipe-filter hook, so a grandparent's low-sodium need removes recipes exactly as an allergy does, and says why.
+- **Food safety without false reassurance.**
+  - `food_safety_check` never says food is safe. It gives the date on record, the general fridge window and "when in doubt, throw it out", and raw meat past its date is always a discard.
+  - `cooking_temp` returns USDA safe minimum internal temperatures.
+  - `cross_contact_tips` covers the prep steps that keep an allergy-safe meal safe.
+- **Confirm-before-buy, enforced twice.** Every purchase path (`shopping_checkout`, and `reorder_staples` through it) goes through the same gate.
   - The server requires the `cartToken` from the cart the user just saw plus `confirmed=true`, and it rejects stale (over 30 minutes) or unknown carts.
   - The agent host adds a second gate. If the model calls `shopping_checkout` with `confirmed=true` but the user's latest turn contained no explicit consent, the host downgrades the call to `confirmed=false`. Sous then asks instead of buying. A test proves this.
   - Orders are clearly labeled *simulated*.
-- **Grounded answers.** Expiry dates, prices and quantities come from the pantry and catalog, never from the model. Impact uses a fixed, documented factor of 2.5 kg CO2e per kg of food rescued.
+- **Grounded answers.** Expiry dates, prices and quantities come from the pantry and catalog, never from the model. Impact uses a fixed, documented factor of 2.5 kg CO2e per kg of food rescued, and it reports food that still went to waste.
 
 ### Potential impact
-- **Who:** any household with a smart display. Primary users are busy parents, households with food allergies and people cooking on a budget.
-- **Value:** ReFED estimates consumer food waste at nearly **$800 per person a year**, roughly **$3,000+ for a family of four**. Rescuing even a quarter of it is worth hundreds of dollars a year per home, with a measurable CO2e reduction shown in-app.
-- **Why Alexa+:** it fits naturally upstream of Alexa+'s existing Amazon Fresh shopping. Sous decides *what* to buy based on what you already have. It also fits the kitchen, where voice-first and glanceable screens matter most. The same MCP server works with any MCP client (Claude, ChatGPT, VS Code), so it isn't locked to one host.
+- **Who it serves first:**
+  - the **33M+ Americans with food allergies** and their families (FARE);
+  - **multigenerational households** cooking for a grandparent with high blood pressure, which affects 71.6% of adults 60 and older (CDC);
+  - the **~18 million food-insecure households** for whom every wasted dollar matters (USDA ERS).
+
+  These overlap with almost every household that wastes food, which ReFED puts at nearly **$800 per person a year**.
+- **Safety value.** The family's allergy and diet rules are applied to every suggestion, substitute, improvised recipe and scanned label. A description of a severe reaction gets an immediate emergency script instead of a chatty answer.
+- **Money and waste.** Rescuing even a quarter of a family of four's waste is worth hundreds of dollars a year. Sous measures it in-app: dollars and kilograms rescued and CO2e avoided, plus the food that still went to waste, so the number can go down as well as up.
+- **Community.** Surplus food is routed to a neighbor or community fridge before it expires (simulated listings in this build).
+- **Why Alexa+:** it fits naturally upstream of Alexa+'s existing Amazon Fresh shopping. Sous decides *what* to buy, and *whether it's safe for everyone*, based on what you already have. It also fits the kitchen, where voice-first and glanceable screens matter most. The same MCP server works with any MCP client (Claude, ChatGPT, VS Code), so it isn't locked to one host.
 - **Path beyond the hackathon:**
   - OAuth 2.1 + PKCE account linking (the Alexa+ checklist);
-  - real grocery catalogs;
+  - real grocery catalogs, and real food-bank and community-fridge directories;
+  - dietitian-reviewed diet rules;
   - receipt and barcode pantry import;
   - Fire TV and Echo Hub layouts, which the MCP Apps views already scale to.
+
+### Quality of the idea: the judges' creative signals, one by one
+| Alexa+ creative signal (from the rules) | How Sous does it |
+| --- | --- |
+| Agentic workflow that orchestrates across services | "Plan dinners for the next three nights" chains planner → plan → grocery cart in one turn. `budget_meal_plan` and `reorder_staples` combine pantry, budget and store. With Bedrock, the model picks the chain itself. |
+| Context-aware, state across sessions | Allergies, diets, dislikes, pantry, plan, budget, leftovers, shopping list and cook progress all persist. A brand-new session still knows Leo's allergy. |
+| Purchasing | Token-bound cart, explicit "yes", idempotent replay, a host-side consent gate and budget awareness |
+| Media support (cards, carousels) | Five MCP Apps views on Echo Show: recipe carousel, cook-along, cart/receipt, pantry and impact chart |
+| MCP Apps | `ui://sous/*.html` (`text/html;profile=mcp-app`) linked from tools; cards call tools back on tap, so voice and touch share one path |
+| Agent Skills | `skills/sous-kitchen/SKILL.md` packages the voice contract and workflows for any agent |
+| Not a wrapper or single-turn bot | 44 tools over a deterministic domain core (planner, allergen and diet guards, emergency red flag, purchase gate) with 253 automated tests |
 
 ### What we built during the submission window
 Everything in this repository was built on **23 October 2026**, within the submission window: the MCP server and all tools, the planner and guards, the MCP Apps views, the Echo Show simulator host, the Bedrock agent, the landing page, the tests and the docs. Nothing predates the hackathon.
@@ -98,16 +155,30 @@ Everything in this repository was built on **23 October 2026**, within the submi
 - Node.js 20+, TypeScript, Express 5, `@modelcontextprotocol/sdk` 1.32 for the server and the agent's client, and Zod 4 for schemas.
 - Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime`.
 - Vanilla HTML/CSS/JS for MCP Apps views, so each view is a single self-contained file. Three.js for the landing hero.
-- **39 Vitest tests:** planner ranking, allergen and dislike exclusion, cart and checkout (token, expiry, idempotent replay), MCP over real Streamable HTTP, the Bedrock tool loop against a scripted Converse mock, the consent gate that blocks a model-initiated purchase, and offline small talk.
+- **253 Vitest tests**, covering:
+  - planner ranking, and allergen, dislike and diet exclusion;
+  - the allergy-emergency red flag, including negations, and label scanning with "may contain";
+  - cart and checkout: token, expiry, idempotent replay;
+  - budget, leftovers, donations, planning and household tools;
+  - MCP over real Streamable HTTP;
+  - the Bedrock tool loop against a scripted Converse mock;
+  - the consent gate that blocks a model-initiated purchase;
+  - offline small talk.
+- A small **tool registry**, so each module (core, safety, budget, planning, household) registers its tools and voice routes independently. That let us build the modules in parallel.
 - AI pair-programming with Claude Code for scaffolding and parallel workstreams.
 
 ### Challenges
 - **Testing without the real Alexa+ toolkit.** The official web simulator and inspector are behind the Private Preview, so we implemented the MCP Apps host side ourselves, following the spec (stable 2026-01-26).
+- **Safety text that helps without diagnosing.** The allergy-emergency script and the food-safety answers are fixed, conservative strings in code. Sous never declares food "safe", and it always errs toward "call 911" or "throw it out".
 - **Voice-first purchasing.** We had to make "yes" safe: a token-bound confirmation, plus a `followUp` contract so the agent re-issues the exact call.
+- **Serverless MCP.** Streamable HTTP sessions don't survive serverless instances, so the Vercel deployment runs the stateless mode and the simulator's agent uses the SDK's in-memory transport.
 - **Designing for a 768×480 base canvas** that scales 1.667× on an Echo Show 15. We had to fit huge type and low content density into it.
 
 ### What's next
-Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt and photo pantry capture, and shared household plans across Echo devices and the Alexa app.
+- Account linking (OAuth 2.1 + PKCE) and a real Amazon Fresh cart handoff.
+- Real community-fridge and food-bank directories, and dietitian-reviewed diet rules.
+- Receipt and photo pantry capture.
+- Shared household plans and allergy profiles across Echo devices and the Alexa app, so a babysitter or grandparent's Echo knows Leo's allergy too.
 
 ---
 

@@ -81,6 +81,10 @@ export function emergencyRoute(text: string): Route | null {
     const hit = r(t);
     if (hit && hit.tool === 'allergy_emergency') return hit;
   }
+  // Milder or negated reaction wording still goes to the safety tool, which decides between "watch closely" and 911.
+  if (/\b(rash|hives|itchy|itching|swell\w*|wheez\w*|allergic reaction|reaction to|anaphyla\w*|epi ?pen|trouble breathing|can'?t breathe)\b/.test(t)) {
+    return { tool: 'allergy_emergency', args: { description: text } };
+  }
   return null;
 }
 
@@ -92,7 +96,21 @@ export function route(text: string, ctx: RouteContext): Route {
   const mem = memory(text.replace(/^(alexa|hey alexa)[, ]*/i, ''));
   if (mem) return mem;
 
-  if (/\btimer\b/.test(t)) return { tool: 'timer_set', args: { ...(parseDuration(t) ?? {}) } };
+  // Specific intents that the generic rules below would otherwise swallow.
+  if (/\b(cancel|stop|clear|delete|remove|turn off)\b.*\btimers?\b/.test(t)) return { tool: 'timer_cancel', args: /\ball\b|\btimers\b/.test(t) ? { all: true } : {} };
+  if (/\bhow (long|much)\b.*\b(left|timer)\b|\btimers?\b.*\bleft\b|\bwhat timers\b|\blist (the |my )?timers\b/.test(t)) return { tool: 'timer_list', args: {} };
+  if (/\b(clear|delete|reset|cancel|wipe|scrap)\b.*\b(meal )?plan\b/.test(t)) return { tool: 'meal_plan_clear', args: {} };
+  if (/\bleftovers?\b/.test(t) && /\b(make|use|ideas?|cook)\b|\bdo with\b/.test(t)) return { tool: 'leftovers_ideas', args: {} };
+  if (/\b(what'?s|what is) (the |our )?(meal )?plan\b|\bwhat are we (having|eating)\b|\bwhat'?s planned\b/.test(t)) return { tool: 'meal_plan_get', args: {} };
+  if (/\b(cheap|cheapest|budget|afford|inexpensive)\b|\bunder \$?\d+(\.\d+)?\s*(dollars?|bucks)?\b.*\bserving\b/.test(t) && /\b(dinner|dinners|meal|meals|plan|cook|eat)\b/.test(t)) {
+    const cap = t.match(/under \$?(\d+(?:\.\d+)?)/);
+    return { tool: 'budget_meal_plan', args: cap ? { maxUsdPerServing: Number(cap[1]) } : {} };
+  }
+
+  // Only "set a timer"-style phrases start one; list/cancel/how-long phrasings go to the planning module's routes.
+  if (/\btimer\b/.test(t) && !/\b(cancel|stop|clear|delete|remove|turn off|how (long|much)|left|list|what)\b/.test(t)) {
+    return { tool: 'timer_set', args: { ...(parseDuration(t) ?? {}) } };
+  }
 
   if (ctx.cooking) {
     if (/^(next|next step|ok next|okay next|done|continue|what'?s next|go on)\b/.test(t) || /\bnext step\b/.test(t)) return { tool: 'cook_step', args: { action: 'next' } };

@@ -66,9 +66,6 @@ export function smallTalk(text: string, ctx: TalkContext): string | null {
       'What do you call cheese that is not yours? Nacho cheese.'
     ]);
   }
-  if (/\b(what'?s|what is) (the )?plan\b|what are we (having|eating)|meal plan\b/.test(t)) {
-    return ctx.plan.length ? `The plan: ${ctx.plan.slice(0, -1).join(', ')}${ctx.plan.length > 1 ? ' and ' : ''}${ctx.plan[ctx.plan.length - 1]}.` : 'No plan yet. Say "plan dinners for the next three nights".';
-  }
   if (/\bwhat'?s in (my|the) cart\b|\bmy cart\b|\border status\b/.test(t)) {
     if (!ctx.cart) return 'Your cart is empty. Say "add what we\'re missing to the cart".';
     return ctx.cart.placed ? `Your order of $${ctx.cart.totalUsd.toFixed(2)} is placed and arrives today between 6 and 8.` : `Your cart has ${ctx.cart.items} items for $${ctx.cart.totalUsd.toFixed(2)}. Say "place the order" to confirm.`;

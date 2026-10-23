@@ -432,7 +432,7 @@ tool({
     }
     if (!total) return fail('timer_set', 'How long should the timer be?');
     const timers = update(st => {
-      st.timers.push({ id: `t_${Date.now().toString(36)}`, label: name ?? 'Kitchen timer', endsAt: new Date(Date.now() + total * 1000).toISOString(), seconds: total });
+      st.timers.push({ id: `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, label: name ?? 'Kitchen timer', endsAt: new Date(Date.now() + total * 1000).toISOString(), seconds: total });
       return st.timers;
     });
     activeTimers();
