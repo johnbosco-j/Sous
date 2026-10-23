@@ -11,7 +11,7 @@
 Alexa+ kitchen agent that keeps everyone at the table safe and fed: dinner from food about to expire, allergy and diet risks blocked in code, groceries ordered only after a yes.
 
 ## Short summary (use where a longer summary is allowed)
-Sous is a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) that turns Alexa+ on an Echo Show into a kitchen agent for the whole family, built on one promise: **everyone at the table is safe and fed, and good food doesn't go in the bin.** It plans dinner around food that's about to expire. It removes recipes that clash with a child's food allergy or a grandparent's low-sodium diet, in deterministic code. If someone describes a severe allergic reaction, it gives a fixed emergency script. It keeps the weekly grocery budget and orders only after an explicit "yes". It cooks with you hands-free on interactive MCP Apps cards, and it shows the dollars and CO2e you rescued. 44 MCP tools, 253 automated tests, live at https://sous-alexa.vercel.app.
+Sous is a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) that turns Alexa+ on an Echo Show into a kitchen agent for the whole family, built on one promise: **everyone at the table is safe and fed, and good food doesn't go in the bin.** It plans dinner around food that's about to expire. It removes recipes that clash with a child's food allergy or a grandparent's low-sodium diet, in deterministic code. If someone describes a severe allergic reaction, it gives a fixed emergency script. It keeps the weekly grocery budget and orders only after an explicit "yes". It cooks with you hands-free on interactive MCP Apps cards, and it shows the dollars and CO2e you rescued. 44 MCP tools, 254 automated tests, live at https://sous-alexa.vercel.app.
 
 ---
 
@@ -146,7 +146,7 @@ These rules live in deterministic, tested code, not in a prompt. A model can phr
 | Media support (cards, carousels) | Five MCP Apps views on Echo Show: recipe carousel, cook-along, cart/receipt, pantry and impact chart |
 | MCP Apps | `ui://sous/*.html` (`text/html;profile=mcp-app`) linked from tools; cards call tools back on tap, so voice and touch share one path |
 | Agent Skills | `skills/sous-kitchen/SKILL.md` packages the voice contract and workflows for any agent |
-| Not a wrapper or single-turn bot | 44 tools over a deterministic domain core (planner, allergen and diet guards, emergency red flag, purchase gate) with 253 automated tests |
+| Not a wrapper or single-turn bot | 44 tools over a deterministic domain core (planner, allergen and diet guards, emergency red flag, purchase gate) with 254 automated tests |
 
 ### What we built during the submission window
 Everything in this repository was built on **23 October 2026**, within the submission window: the MCP server and all tools, the planner and guards, the MCP Apps views, the Echo Show simulator host, the Bedrock agent, the landing page, the tests and the docs. Nothing predates the hackathon.
@@ -155,7 +155,7 @@ Everything in this repository was built on **23 October 2026**, within the submi
 - Node.js 20+, TypeScript, Express 5, `@modelcontextprotocol/sdk` 1.32 for the server and the agent's client, and Zod 4 for schemas.
 - Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime`.
 - Vanilla HTML/CSS/JS for MCP Apps views, so each view is a single self-contained file. Three.js for the landing hero.
-- **253 Vitest tests**, covering:
+- **254 Vitest tests**, covering:
   - planner ranking, and allergen, dislike and diet exclusion;
   - the allergy-emergency red flag, including negations, and label scanning with "may contain";
   - cart and checkout: token, expiry, idempotent replay;

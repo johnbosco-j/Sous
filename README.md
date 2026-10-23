@@ -1,6 +1,6 @@
 # Sous: the kitchen agent for Alexa+ that keeps everyone at the table safe and fed
 
-**Sous** is a self-hosted **MCP server** (spec **2025-11-25**, **Streamable HTTP**, 44 tools, 253 tests) that gives Alexa+ a kitchen brain for the whole family:
+**Sous** is a self-hosted **MCP server** (spec **2025-11-25**, **Streamable HTTP**, 44 tools, 254 tests) that gives Alexa+ a kitchen brain for the whole family:
 - It plans dinner around the food that is about to expire.
 - It keeps a child's food allergy and a grandparent's low-sodium diet out of every recipe, enforced in code.
 - If someone describes a severe allergic reaction, it gives a fixed emergency script.
@@ -164,7 +164,7 @@ The hosted server runs **stateless Streamable HTTP** on Vercel (a fresh MCP serv
 ### Tests
 
 ```bash
-npm test        # 253 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
+npm test        # 254 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
                 # Streamable HTTP, and the Bedrock tool loop (scripted Converse mock), including a model that tries to buy without consent, and offline small talk
 npm run typecheck
 ```
