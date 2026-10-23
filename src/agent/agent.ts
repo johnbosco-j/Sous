@@ -7,7 +7,7 @@ import { createSousServer } from '../mcp/server.js';
 import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { bedrockAvailable, converse } from '../aws/bedrock.js';
 import { activeTimers, getState, Timer } from '../domain/store.js';
-import { NO, PLAN_WEEK, YES, route } from './rules.js';
+import { NO, PLAN_WEEK, YES, emergencyRoute, route } from './rules.js';
 import { TalkContext, fallback, smallTalk } from './smalltalk.js';
 import { pantryView, cartView } from '../domain/kitchen.js';
 import { RECIPE_BY_ID } from '../domain/catalog.js';
@@ -37,7 +37,10 @@ Rules:
 - "Let's cook the first one" -> cook_start with pick=1 (or the recipeId). While cooking, "next/back/repeat" -> cook_step.
 - "Add what we're missing to the cart" -> shopping_cart_build with no arguments.
 - shopping_checkout: confirmed=true ONLY if the user's latest message explicitly says yes to placing the order. Otherwise ask first.
-- Remembering allergies or dislikes -> household_memory with action "remember".`;
+- Remembering allergies or dislikes -> household_memory with action "remember". Diet needs ("Grandpa needs low sodium") -> diet_profile.
+- Any sign of an allergic reaction -> allergy_emergency FIRST, and speak its text exactly.
+- "Instead of X" -> substitute_ingredient. "Is X still good?" -> food_safety_check. Safe temperatures -> cooking_temp. Product labels -> allergen_scan.
+- Budget -> budget_set / budget_status / budget_meal_plan. Surplus food -> donate_surplus. Leftovers -> leftovers_log / leftovers_ideas.`;
 
 const MAX_TOOL_ROUNDS = 4;
 
@@ -68,7 +71,8 @@ class AgentSession {
       await createSousServer().connect(serverSide);
       await client.connect(clientSide);
     } else {
-      await client.connect(new StreamableHTTPClientTransport(new URL(this.mcpUrl)));
+      const key = (process.env.SOUS_API_KEYS ?? '').split(',')[0]?.trim();
+      await client.connect(new StreamableHTTPClientTransport(new URL(this.mcpUrl), key ? { requestInit: { headers: { Authorization: `Bearer ${key}` } } } : undefined));
     }
     this.tools = (await client.listTools()).tools;
     this.client = client;
@@ -126,6 +130,14 @@ class AgentSession {
     const turn = new Turn(YES.test(text) && !NO.test(text.replace(/\bno+t? (problem|worries)\b/i, '')));
     turn.userText = text;
     const lower = text.toLowerCase();
+
+    // 0. A possible allergic reaction goes straight to the deterministic emergency script, before anything else.
+    const emergency = emergencyRoute(text);
+    if (emergency && 'tool' in emergency) {
+      this.pending = null;
+      await this.call(emergency.tool, emergency.args, turn);
+      return this.respond(turn, 'rules');
+    }
 
     // 1. A pending confirmation is resolved deterministically: a "yes" never depends on the model rebuilding arguments.
     if (this.pending) {

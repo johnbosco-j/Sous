@@ -74,7 +74,19 @@ function splitItems(s: string): string[] {
   return s.replace(/[.!?]/g, '').split(/,|\band\b/).map(x => x.trim()).filter(Boolean).slice(0, 6);
 }
 
+/** Possible allergic reaction: checked before anything else (small talk, confirmations, the LLM). */
+export function emergencyRoute(text: string): Route | null {
+  const t = text.toLowerCase();
+  for (const r of voiceRoutes) {
+    const hit = r(t);
+    if (hit && hit.tool === 'allergy_emergency') return hit;
+  }
+  return null;
+}
+
 export function route(text: string, ctx: RouteContext): Route {
+  const emergency = emergencyRoute(text);
+  if (emergency) return emergency;
   const t = text.toLowerCase().replace(/^(alexa|hey alexa|ok alexa)[, ]*/i, '').trim();
 
   const mem = memory(text.replace(/^(alexa|hey alexa)[, ]*/i, ''));

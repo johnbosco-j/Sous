@@ -44,6 +44,17 @@ export function createApp() {
   const rpcError = (res: Response, status: number, code: number, message: string) =>
     res.status(status).json({ jsonrpc: '2.0', error: { code, message }, id: null });
 
+  // Optional bearer-key auth for /mcp (SOUS_API_KEYS=key1,key2). Production Alexa+ linking uses OAuth 2.1 + PKCE.
+  const apiKeys = (process.env.SOUS_API_KEYS ?? '').split(',').map(k => k.trim()).filter(Boolean);
+  if (apiKeys.length) {
+    app.use(MCP_PATH, (req, res, next) => {
+      if (req.method === 'OPTIONS') return next();
+      const token = (req.header('authorization') ?? '').replace(/^Bearer\s+/i, '');
+      if (!apiKeys.includes(token)) return rpcError(res, 401, -32001, 'Unauthorized: send Authorization: Bearer <key>');
+      next();
+    });
+  }
+
   app.post(MCP_PATH, async (req: Request, res: Response) => {
     if (STATELESS) {
       try {

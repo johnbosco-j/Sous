@@ -336,7 +336,7 @@
       </div>
       <div class="wrap">
         <p class="kicker" data-reveal>What Sous does</p>
-        <h2 class="display" id="feat-title" data-reveal style="--i:1">A sous-chef that <em>remembers,</em> plans and shops.</h2>
+        <h2 class="display" id="feat-title" data-reveal style="--i:1">A sous-chef that <em>remembers,</em> plans, shops and keeps everyone at the table safe.</h2>
 
         <div class="grid">
           <article class="card" data-reveal style="--i:0;--c:var(--tomato)">
@@ -386,6 +386,30 @@
             <h3>Echo Show cards</h3>
             <p>Every result ships an MCP App: carousels, cook steps, carts and impact charts render as tappable cards.</p>
             <code>ui://sous/*.html</code>
+          </article>
+          <article class="card" data-reveal style="--i:0;--c:var(--tomato)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+            <h3>Allergy emergency script</h3>
+            <p>"Leo's lips are swelling" triggers a fixed, deterministic script: call 911, use the prescribed epinephrine. Checked before anything else, never generated.</p>
+            <code>allergy_emergency</code>
+          </article>
+          <article class="card" data-reveal style="--i:1;--c:var(--basil)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.1a3 3 0 0 1 0 5.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg></div>
+            <h3>Safe for every generation</h3>
+            <p>Diet profiles (low-sodium for Grandpa, diabetes-friendly, vegetarian, soft foods) remove recipes for everyone they don't suit, with the reason.</p>
+            <code>diet_profile · meal_safety_check</code>
+          </article>
+          <article class="card" data-reveal style="--i:2;--c:var(--saffron)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>Budget &amp; community</h3>
+            <p>Weekly grocery budget, cheapest use-it-up plans, and surplus food routed to a community fridge (simulated) before it spoils.</p>
+            <code>budget_meal_plan · donate_surplus</code>
+          </article>
+          <article class="card" data-reveal style="--i:3;--c:var(--cyan)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg></div>
+            <h3>Food safety, by the rules</h3>
+            <p>USDA safe cooking temperatures, storage windows and leftover limits. Sous never says "it's safe"; past-date raw meat is always a throw-out.</p>
+            <code>food_safety_check · cooking_temp</code>
           </article>
         </div>
       </div>

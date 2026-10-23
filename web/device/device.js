@@ -19,6 +19,11 @@ const CHIPS = [
   'How much food have we saved?',
   "What's about to expire?",
   "Remember Ava doesn't like mushrooms",
+  "Leo's lips are swelling after eating",
+  'Grandpa needs low sodium',
+  'What can I use instead of eggs?',
+  'Is the chicken still good?',
+  'Plan cheap dinners under 3 dollars a serving',
 ];
 const TRY = [
   '“Alexa, what should we cook tonight?”',
