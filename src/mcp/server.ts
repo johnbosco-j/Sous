@@ -8,59 +8,29 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { bedrockAvailable, improviseRecipe } from '../aws/bedrock.js';
-import { RECIPE_BY_ID, Recipe, findIngredient, findRecipe } from '../domain/catalog.js';
+import { INGREDIENT_BY_ID, RECIPE_BY_ID, Recipe, findIngredient, findRecipe } from '../domain/catalog.js';
+import { LEFTOVER_DAYS, STORAGE, SUBSTITUTES } from '../domain/knowledge.js';
 import {
-  allergenHitsInText, buildCart, cartView, checkout, cookView, finishCooking, impact, listPhrase,
+  allergenHits, allergenHitsInText, buildCart, cartView, checkout, cookView, finishCooking, impact, listPhrase,
   normalizeAllergen, pantryView, suggestMeals, whenPhrase
 } from '../domain/kitchen.js';
-import { activeTimers, addDays, daysUntil, getState, round2, update } from '../domain/store.js';
+import { activeTimers, addDays, dayKey, daysUntil, getState, round2, update } from '../domain/store.js';
 
 export const SERVER_VERSION = '1.0.0';
 export const UI_MIME = 'text/html;profile=mcp-app';
 
-export type View = 'meals' | 'cook' | 'cart' | 'pantry' | 'impact';
+import { Envelope, FollowUp, View, allergenWord, env, fail, lastSuggestions, tool, tools } from './registry.js';
+import './tools/index.js';
+export type { Envelope, FollowUp, View };
 
-export interface FollowUp { prompt: string; tool: string; arguments: Record<string, unknown> }
-export interface Envelope {
-  ok: boolean;
-  tool: string;
-  speech: string;
-  view?: View;
-  data: Record<string, unknown>;
-  followUp?: FollowUp;
-}
-
-const INSTRUCTIONS = `Sous is the household's kitchen agent: pantry, meal planning, groceries and hands-free cooking.
+const INSTRUCTIONS = `Sous is the household's kitchen agent: pantry, meal planning, groceries, food and allergy safety, and hands-free cooking.
 - Speak each tool's text content as written; it is short and voice-ready.
-- Prefer meal_suggest for "what's for dinner?"; it ranks recipes by how much soon-to-expire food they rescue and already removes anything a household member is allergic to.
+- Prefer meal_suggest for "what's for dinner?"; it ranks recipes by how much soon-to-expire food they rescue and already removes anything a household member is allergic to or must avoid.
+- If someone describes an allergic reaction (swelling, trouble breathing, hives after eating), call allergy_emergency immediately and speak its text exactly.
 - When structuredContent.followUp is present, ask its prompt. Only if the user clearly agrees in their next turn, call followUp.tool with followUp.arguments.
 - Purchases: shopping_checkout needs the cartToken from shopping_cart_build and confirmed=true. Set confirmed=true ONLY after the user explicitly says yes to placing that order.
 - While cooking, map "next", "back", "repeat", "what do I need" to cook_step.
 - If structuredContent.view is set and the device has a screen, render the tool's ui:// resource (MCP Apps).`;
-
-interface ToolDef<S extends z.ZodType> {
-  name: string;
-  title: string;
-  description: string;
-  input: S;
-  annotations: Omit<ToolAnnotations, 'title'>;
-  view?: View;
-  icon: string;
-  handler: (args: z.infer<S>) => Promise<Envelope> | Envelope;
-}
-
-const tools: ToolDef<any>[] = [];
-function tool<S extends z.ZodType>(def: ToolDef<S>) {
-  tools.push(def);
-}
-
-function env(tool: string, speech: string, data: Record<string, unknown>, extra: Partial<Envelope> = {}): Envelope {
-  return { ok: true, tool, speech, data, ...extra };
-}
-
-function fail(tool: string, speech: string, data: Record<string, unknown> = {}): Envelope {
-  return { ok: false, tool, speech, data };
-}
 
 function minutesPhrase(seconds: number): string {
   if (seconds < 60) return `${seconds} second`;
@@ -68,7 +38,6 @@ function minutesPhrase(seconds: number): string {
   return `${m} minute`;
 }
 
-const lastSuggestions: { ids: string[] } = { ids: [] };
 
 // ---------------- pantry ----------------
 
@@ -300,6 +269,11 @@ tool({
         if (!ing) { unknown.push(it.name); return []; }
         return [{ id: ing.id, qty: it.qty ?? ing.packSize }];
       });
+      // The running shopping list rides along with whatever the recipes need.
+      for (const entry of s.shoppingList) {
+        const ing = findIngredient(entry.name);
+        if (ing && !extras.some(e => e.id === ing.id)) extras.push({ id: ing.id, qty: ing.packSize });
+      }
       const cart = buildCart(s, ids, extras);
       return { cart, view: cartView(s, cart), ids };
     });
@@ -332,6 +306,11 @@ tool({
   handler: ({ cartToken, confirmed }) => {
     const out = update(s => {
       const r = checkout(s, cartToken, confirmed);
+      if (r.kind === 'placed' && !r.alreadyPlaced) {
+        // Ordered items come off the running shopping list.
+        const ordered = new Set(r.cart.lines.map(l => l.id));
+        s.shoppingList = s.shoppingList.filter(x => !ordered.has(findIngredient(x.name)?.id ?? ''));
+      }
       return { r, view: 'cart' in r ? cartView(s, r.cart) : null };
     });
     const { r, view } = out;
@@ -524,7 +503,179 @@ tool({
   icon: '🌱',
   handler: () => {
     const d = impact(getState());
-    return env('impact_report', `This week you rescued $${d.rescuedUsd.toFixed(2)} of food, about ${d.rescuedKg} kilograms, which avoids roughly ${d.co2eKg} kilograms of CO2e. At this pace that's $${d.projectionYearUsd.toLocaleString('en-US')} a year.`, d as any, { view: 'impact' });
+    const waste = d.wastedUsd > 0 ? ` $${d.wastedUsd.toFixed(2)} still went in the bin, so there's room to do better.` : '';
+    return env('impact_report', `This week you rescued $${d.rescuedUsd.toFixed(2)} of food, about ${d.rescuedKg} kilograms, which avoids roughly ${d.co2eKg} kilograms of CO2e. At this pace that's $${d.projectionYearUsd.toLocaleString('en-US')} a year.${waste}`, d as any, { view: 'impact' });
+  }
+});
+
+
+// ---------------- kitchen knowledge ----------------
+
+tool({
+  name: 'substitute_ingredient',
+  title: 'Allergy-safe substitution',
+  description: 'Suggest a substitute for an ingredient you are out of or cannot eat. Options containing any household allergen are removed (deterministic), and the reason is given.',
+  input: z.object({
+    ingredient: z.string().describe('e.g. "eggs", "butter", "peanut butter"'),
+    member: z.string().optional().describe('Only consider this member\'s allergies; default is the whole household')
+  }),
+  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  icon: '🔁',
+  handler: ({ ingredient, member }) => {
+    const ing = findIngredient(ingredient);
+    const options = ing ? SUBSTITUTES[ing.id] ?? [] : [];
+    const name = ing?.name ?? ingredient;
+    if (!options.length) return fail('substitute_ingredient', `I don't have a tested substitute for ${name} yet. Want a recipe that doesn't need it?`, { ingredient: name, options: [], removed: [] });
+    const h = getState().household;
+    const people = member ? h.members.filter(m => m.name.toLowerCase() === member.toLowerCase()) : h.members;
+    const allergies = people.flatMap(m => m.allergies.map(a => ({ member: m.name, allergen: normalizeAllergen(a) ?? a })));
+    const safe = options.filter(o => !o.allergens.some(a => allergies.some(x => x.allergen === a)));
+    const removed = options.filter(o => !safe.includes(o)).map(o => {
+      const hit = allergies.find(x => o.allergens.includes(x.allergen as any))!;
+      return { use: o.use, reason: `${hit.member} is allergic to ${allergenWord(hit.allergen)}` };
+    });
+    const ownAllergy = ing ? allergenHits({ ...h, members: people }, [ing.id]) : [];
+    if (!safe.length) return fail('substitute_ingredient', `Every substitute I know for ${name} clashes with an allergy here, so I'd pick a different recipe.`, { ingredient: name, options: [], removed });
+    const [best, ...rest] = safe;
+    let speech = `Instead of ${name}, use ${best.use}: ${best.ratio}${best.note ? `, ${best.note}` : ''}.`;
+    if (rest.length) speech += ` Or ${rest[0].use}.`;
+    if (removed.length) speech += ` I skipped ${removed[0].use} because ${removed[0].reason}.`;
+    if (ownAllergy.length) speech = `Good call swapping it: ${ownAllergy[0].member} is allergic to ${allergenWord(normalizeAllergen(ownAllergy[0].allergen) ?? ownAllergy[0].allergen)}. ` + speech;
+    return env('substitute_ingredient', speech, { ingredient: name, options: safe, removed });
+  }
+});
+
+tool({
+  name: 'food_safety_check',
+  title: 'Is it still good?',
+  description: 'Conservative, rule-based storage guidance for an ingredient in the pantry, or for leftovers: days left on its date, the general fridge window, and what to look for. Never declares food safe; past-date raw protein is always a "throw it out".',
+  input: z.object({
+    item: z.string().describe('e.g. "chicken", "rice", "leftover curry"'),
+    cookedDaysAgo: z.number().int().min(0).max(30).optional().describe('For leftovers: how many days ago it was cooked')
+  }),
+  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  icon: '🧊',
+  handler: ({ item, cookedDaysAgo }) => {
+    const isLeftover = /left ?over|cooked|yesterday'?s|last night/i.test(item) || cookedDaysAgo !== undefined;
+    if (isLeftover && !findIngredient(item.replace(/left ?overs?|cooked/gi, '').trim())) {
+      const d = cookedDaysAgo;
+      if (d === undefined) return env('food_safety_check', `Leftovers keep about ${LEFTOVER_DAYS - 1} to ${LEFTOVER_DAYS} days in the fridge if they went in within 2 hours of cooking. When was it cooked?`, { item, rule: 'leftovers', windowDays: [3, 4] });
+      if (d > LEFTOVER_DAYS) return env('food_safety_check', `That was cooked ${d} days ago, past the usual 3 to 4 day window for leftovers. I'd throw it out. When in doubt, throw it out.`, { item, verdict: 'discard', cookedDaysAgo: d });
+      return env('food_safety_check', `Cooked ${d} day${d === 1 ? '' : 's'} ago, so it's within the usual 3 to 4 day window for leftovers if it was refrigerated within 2 hours. Reheat it until steaming hot, and if it smells or looks off, throw it out.`, { item, verdict: 'within-window', cookedDaysAgo: d });
+    }
+    const ing = findIngredient(item);
+    if (!ing) return fail('food_safety_check', `I don't have storage guidance for ${item}. When in doubt, throw it out.`, { item });
+    const s = getState();
+    const lots = s.pantry.filter(p => p.id === ing.id && p.qty > 0);
+    const days = lots.map(l => daysUntil(l.expiresOn)).filter((x): x is number => x !== null);
+    const soonest = days.length ? Math.min(...days) : null;
+    const rule = STORAGE[ing.id];
+    const tip = rule?.tip ?? '';
+    let verdict: 'discard' | 'use-today' | 'within-date' | 'not-in-pantry' | 'no-date';
+    let speech: string;
+    if (!lots.length) { verdict = 'not-in-pantry'; speech = `I don't see ${ing.name} in the pantry.${rule ? ` In general it keeps ${rule.fridgeDays[0]} to ${rule.fridgeDays[1]} days in the fridge.` : ''}`; }
+    else if (soonest === null) { verdict = 'no-date'; speech = `${ing.name} has no date recorded.${rule ? ` In general it keeps ${rule.fridgeDays[0]} to ${rule.fridgeDays[1]} days in the fridge.` : ''} Check it before using.`; }
+    else if (soonest < 0) {
+      verdict = 'discard';
+      speech = rule?.kind === 'raw-protein'
+        ? `Your ${ing.name} is past its date. Don't eat it; raw meat past its date should go in the bin.`
+        : `Your ${ing.name} is past its date by ${-soonest} day${soonest === -1 ? '' : 's'}. When in doubt, throw it out.`;
+    } else if (soonest <= 1) { verdict = 'use-today'; speech = `Your ${ing.name} is good until ${whenPhrase(soonest)}, so use it today or tomorrow, or freeze it now.`; }
+    else { verdict = 'within-date'; speech = `Your ${ing.name} is within its date, until ${whenPhrase(soonest)}.`; }
+    if (tip && verdict !== 'discard') speech += ` ${tip}`;
+    return env('food_safety_check', speech, { item: ing.name, verdict, expiresInDays: soonest, fridgeDays: rule?.fridgeDays ?? null, tip });
+  }
+});
+
+tool({
+  name: 'recipe_details',
+  title: 'Recipe details',
+  description: 'Ingredients and steps for a recipe, scaled to a number of servings, with what is missing from the pantry and an allergen check against the household.',
+  input: z.object({
+    recipe: z.string().describe('Recipe name or id, e.g. "the curry"'),
+    servings: z.number().int().min(1).max(20).optional()
+  }),
+  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  icon: '📖',
+  handler: ({ recipe, servings }) => {
+    const r = RECIPE_BY_ID.get(recipe) ?? findRecipe(recipe);
+    if (!r) return fail('recipe_details', `I couldn't find a recipe called ${recipe}.`, {});
+    const s = getState();
+    const factor = servings ? servings / r.servings : 1;
+    const have = (id: string) => s.pantry.filter(p => p.id === id && p.qty > 0).reduce((n, p) => n + p.qty, 0);
+    const ingredients = r.ingredients.map(ri => {
+      const i = INGREDIENT_BY_ID.get(ri.id)!;
+      const qty = round2(ri.qty * factor);
+      return { name: i.name, qty, unit: i.unit, have: have(ri.id) >= qty };
+    });
+    const hits = allergenHits(s.household, r.ingredients.map(i => i.id));
+    const missing = ingredients.filter(i => !i.have).map(i => i.name);
+    let speech = `${r.title} serves ${servings ?? r.servings} in about ${r.minutes} minutes, ${r.steps.length} steps.`;
+    if (factor !== 1) speech += ` I've scaled it by ${round2(factor)}.`;
+    speech += missing.length ? ` You're missing ${listPhrase(missing)}.` : ' You have everything.';
+    speech += hits.length ? ` Careful: it contains ${hits[0].ingredient}, and ${hits[0].member} is allergic to ${allergenWord(normalizeAllergen(hits[0].allergen) ?? hits[0].allergen)}.` : ' It contains none of your household\'s allergens.';
+    return env('recipe_details', speech, { recipeId: r.id, title: r.title, servings: servings ?? r.servings, minutes: r.minutes, ingredients, steps: r.steps.map(x => x.text), allergenHits: hits });
+  }
+});
+
+tool({
+  name: 'shopping_list',
+  title: 'Shopping list',
+  description: 'A running shopping list that persists across sessions: get, add, remove or clear items. shopping_cart_build includes it automatically.',
+  input: z.object({
+    action: z.enum(['get', 'add', 'remove', 'clear']).default('get'),
+    items: z.array(z.string()).max(10).optional()
+  }),
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  icon: '📝',
+  handler: ({ action, items }) => {
+    const list = update(s => {
+      if (action === 'clear') s.shoppingList = [];
+      for (const raw of items ?? []) {
+        const name = (findIngredient(raw)?.name ?? raw).trim().toLowerCase();
+        if (!name) continue;
+        if (action === 'add' && !s.shoppingList.some(x => x.name === name)) s.shoppingList.push({ name, addedAt: new Date().toISOString() });
+        if (action === 'remove') s.shoppingList = s.shoppingList.filter(x => x.name !== name);
+      }
+      return s.shoppingList;
+    });
+    const names = list.map(x => x.name);
+    const speech = action === 'clear' ? 'Your shopping list is cleared.'
+      : action === 'add' ? `Added ${listPhrase((items ?? []).map(i => findIngredient(i)?.name ?? i))}. Your list has ${names.length} item${names.length === 1 ? '' : 's'}.`
+      : action === 'remove' ? `Removed. ${names.length ? `Still on the list: ${listPhrase(names)}.` : 'Your list is empty.'}`
+      : names.length ? `On your list: ${listPhrase(names)}. Say "add the list to the cart" when you're ready.` : 'Your shopping list is empty.';
+    return env('shopping_list', speech, { items: list });
+  }
+});
+
+tool({
+  name: 'waste_log',
+  title: 'Log thrown-away food',
+  description: 'Record food that was thrown away, so the impact report stays honest and Sous learns what tends to go to waste.',
+  input: z.object({ items: z.array(z.object({ name: z.string(), qty: z.number().positive().optional() })).min(1).max(10) }),
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  icon: '🗑️',
+  handler: ({ items }) => {
+    const unknown: string[] = [];
+    const logged = update(s => {
+      const out: { name: string; valueUsd: number }[] = [];
+      for (const it of items) {
+        const ing = findIngredient(it.name);
+        if (!ing) { unknown.push(it.name); continue; }
+        const onHand = s.pantry.filter(p => p.id === ing.id && p.qty > 0).reduce((n, p) => n + p.qty, 0);
+        const qty = it.qty ?? (onHand || 1);
+        let left = qty;
+        for (const lot of s.pantry.filter(p => p.id === ing.id && p.qty > 0)) { const take = Math.min(lot.qty, left); lot.qty = round2(lot.qty - take); left -= take; }
+        s.pantry = s.pantry.filter(p => p.qty > 0);
+        const entry = { name: ing.name, valueUsd: round2(qty * ing.priceUsd), kg: round2(qty * ing.kg), date: dayKey(new Date()), recipeId: 'wasted' };
+        s.wasted.push(entry);
+        out.push({ name: entry.name, valueUsd: entry.valueUsd });
+      }
+      return out;
+    });
+    if (!logged.length) return fail('waste_log', `I don't know ${listPhrase(unknown)}, so nothing was logged.`, { logged: [] });
+    const total = round2(logged.reduce((n, x) => n + x.valueUsd, 0));
+    return env('waste_log', `Logged ${listPhrase(logged.map(x => x.name))} as thrown away, about $${total.toFixed(2)}. Next time I'll suggest it sooner.`, { logged, totalUsd: total });
   }
 });
 

@@ -28,6 +28,10 @@ export interface KitchenState {
   timers: Timer[];
   rescued: RescueEntry[];
   mealsCooked: number;
+  shoppingList: { name: string; qty?: number; addedAt: string }[];
+  wasted: RescueEntry[];
+  /** Per-module state for tool modules (src/mcp/tools/*), keyed by module name. */
+  ext: Record<string, any>;
 }
 
 // Serverless file systems are read-only except /tmp (demo state is then per instance).
@@ -67,7 +71,10 @@ export function seedState(now = new Date()): KitchenState {
       const i = INGREDIENT_BY_ID.get(id)!;
       return { name: i.name, valueUsd: round2(i.priceUsd * qty), kg: round2(i.kg * qty), date: addDays(now, offset), recipeId: 'earlier' };
     }),
-    mealsCooked: 6
+    mealsCooked: 6,
+    shoppingList: [],
+    wasted: [],
+    ext: {}
   };
 }
 
@@ -82,6 +89,10 @@ export function getState(): KitchenState {
   if (existsSync(DATA_PATH)) {
     try {
       state = JSON.parse(readFileSync(DATA_PATH, 'utf8')) as KitchenState;
+      // Forward-compatible with state files written by earlier versions
+      state.shoppingList ??= [];
+      state.wasted ??= [];
+      state.ext ??= {};
       return state;
     } catch {
       // Corrupt file: fall through to a fresh seed rather than failing a voice turn.

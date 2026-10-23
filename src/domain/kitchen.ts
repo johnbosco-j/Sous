@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import {
   Allergen, CO2E_PER_KG_FOOD, Household, INGREDIENT_BY_ID, Ingredient, RECIPES, Recipe, RECIPE_BY_ID
 } from './catalog.js';
+import { recipeFilters } from './hooks.js';
 import { CartState, KitchenState, addDays, dayKey, daysUntil, round2 } from './store.js';
 
 // Deterministic kitchen logic. Safety-relevant decisions (allergens, purchases) live here, never in a model prompt.
@@ -206,6 +207,11 @@ export function suggestMeals(s: KitchenState, opts: PlanOptions = {}, now = new 
       excluded.push({ title: r.title, reason: dislikes[0] });
       continue;
     }
+    const blocked = recipeFilters.map(f => f(r, s.household, s)).find(Boolean);
+    if (blocked) {
+      excluded.push({ title: r.title, reason: blocked });
+      continue;
+    }
     if (opts.maxMinutes && r.minutes > opts.maxMinutes) continue;
     if (opts.kidFriendly && !r.kidFriendly) continue;
     ranked.push(scoreRecipe(s, r, now));
@@ -360,8 +366,9 @@ export function impact(s: KitchenState, now = new Date()) {
   const rescuedKg = round2(thisWeek.reduce((n, r) => n + r.kg, 0));
   const totals = new Map<string, number>();
   for (const r of thisWeek) totals.set(r.name, round2((totals.get(r.name) ?? 0) + r.valueUsd));
+  const wastedUsd = round2((s.wasted ?? []).filter(r => r.date >= weekStart).reduce((n, r) => n + r.valueUsd, 0));
   return {
-    rescuedUsd, rescuedKg, co2eKg: round2(rescuedKg * CO2E_PER_KG_FOOD), mealsCooked: s.mealsCooked,
+    rescuedUsd, rescuedKg, co2eKg: round2(rescuedKg * CO2E_PER_KG_FOOD), mealsCooked: s.mealsCooked, wastedUsd,
     itemsRescued: thisWeek.slice(-8).reverse().map(r => ({ name: r.name, valueUsd: r.valueUsd, date: r.date })),
     week, projectionYearUsd: Math.round((rescuedUsd / 7) * 365)
   };

@@ -39,7 +39,7 @@ describe('MCP over Streamable HTTP', () => {
 
   it('lists tools with annotations, output schemas and MCP Apps UI links', async () => {
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(12);
+    expect(tools.length).toBeGreaterThanOrEqual(17);
     const suggest = tools.find(t => t.name === 'meal_suggest')!;
     expect(suggest.annotations?.readOnlyHint).toBe(true);
     expect(suggest.outputSchema).toBeTruthy();
