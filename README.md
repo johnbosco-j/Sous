@@ -9,8 +9,9 @@ tappable cards through **MCP Apps**. It ships with an **Alexa+ / Echo Show simul
 > Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, Alexa+ track (+ AWS Builder mini challenge).
 > All household and pantry data is synthetic. Orders go to a simulated Amazon Fresh store; nothing is purchased.
 
+- **Live:** https://sous-alexa.vercel.app (landing) · **https://sous-alexa.vercel.app/device** (Echo Show simulator) · MCP endpoint `https://sous-alexa.vercel.app/mcp`
 - Demo video: _add your YouTube link here_
-- Echo Show simulator: `http://localhost:8787/device` · Landing page: `http://localhost:8787/`
+- Local: `http://localhost:8787/device` (simulator) · `http://localhost:8787/` (landing)
 
 ## Why
 
@@ -144,7 +145,10 @@ npm start              # the console prints which brain is active
 
 ### Use it from any MCP client
 
-- **MCP Inspector:** `npx @modelcontextprotocol/inspector`, then choose transport *Streamable HTTP* and enter URL `http://localhost:8787/mcp`.
+The hosted server runs **stateless Streamable HTTP** on Vercel (a fresh MCP server per POST, which suits serverless), with demo state kept per instance in `/tmp`. There, the simulator's agent talks MCP to Sous over the SDK's in-memory transport. Locally it uses Streamable HTTP sessions (`Mcp-Session-Id`).
+
+
+- **MCP Inspector:** `npx @modelcontextprotocol/inspector`, then choose transport *Streamable HTTP* and enter URL `https://sous-alexa.vercel.app/mcp` (or `http://localhost:8787/mcp`).
 - **Alexa+ (developer preview):** expose the server over HTTPS (for example `cloudflared tunnel --url http://localhost:8787`)
   and register `https://<tunnel>/mcp` as the add-on's MCP endpoint. The bundled simulator behaves like the web simulator's
   isolation mode: every utterance is routed to this add-on.

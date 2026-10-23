@@ -215,6 +215,9 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
 ---
 
 ## Testing instructions (for judges)
+
+**Try it live, no install:** https://sous-alexa.vercel.app/device (Echo Show simulator; type or tap the suggestion chips, press T for the MCP trace). Landing page: https://sous-alexa.vercel.app. Public MCP endpoint (stateless Streamable HTTP, spec 2025-11-25): `https://sous-alexa.vercel.app/mcp`. Try it with `npx @modelcontextprotocol/inspector`.
+
 ```bash
 git clone https://github.com/johnbosco-j/sous && cd sous
 npm install
@@ -231,4 +234,5 @@ npm start                      # http://localhost:8787
 
 ## Links
 - Repo: https://github.com/johnbosco-j/sous (MIT)
+- Live demo: https://sous-alexa.vercel.app/device
 - Demo video: `<YouTube URL>`
