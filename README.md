@@ -153,7 +153,8 @@ npm start              # the console prints which brain is active
 ### Tests
 
 ```bash
-npm test        # planner, allergen guard, purchase gate, cooking, voice router, and MCP protocol over Streamable HTTP
+npm test        # 29 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
+                # Streamable HTTP, and the Bedrock tool loop (scripted Converse mock), including a model that tries to buy without consent
 npm run typecheck
 ```
 
