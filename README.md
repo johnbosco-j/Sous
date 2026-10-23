@@ -157,8 +157,8 @@ The hosted server runs **stateless Streamable HTTP** on Vercel (a fresh MCP serv
 ### Tests
 
 ```bash
-npm test        # 29 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
-                # Streamable HTTP, and the Bedrock tool loop (scripted Converse mock), including a model that tries to buy without consent
+npm test        # 39 tests: planner, allergen guard, purchase gate, cooking, voice router, MCP protocol over
+                # Streamable HTTP, and the Bedrock tool loop (scripted Converse mock), including a model that tries to buy without consent, and offline small talk
 npm run typecheck
 ```
 

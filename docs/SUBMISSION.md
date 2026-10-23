@@ -7,10 +7,10 @@
 ## Project name
 **Sous**
 
-## Tagline (max ~200 chars)
-The zero-waste kitchen agent for Alexa+. It plans dinner around what's about to expire, keeps allergies safe, orders only what's missing (after you say yes), and cooks with you hands-free.
+## Tagline / elevator pitch (Devpost limit: 200 chars)
+Alexa+ kitchen agent that plans dinner around food about to expire, blocks allergens in code, orders only after you say yes, and cooks with you hands-free on Echo Show.
 
-## Elevator pitch (short description field)
+## Short summary (use where a longer summary is allowed)
 Sous is a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) that turns Alexa+ on an Echo Show into a sous-chef for the whole household. "Alexa, what should we cook tonight?" returns a carousel of recipes ranked by how much soon-to-expire food they rescue, with peanut dishes removed because Leo is allergic. From there Sous builds the missing-items cart, places the order only after an explicit "yes", walks you through the recipe step by step with timers, and tracks the dollars and CO2e you saved.
 
 ---
@@ -98,7 +98,7 @@ Everything in this repository was built on **23 October 2026**, within the submi
 - Node.js 20+, TypeScript, Express 5, `@modelcontextprotocol/sdk` 1.32 for the server and the agent's client, and Zod 4 for schemas.
 - Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime`.
 - Vanilla HTML/CSS/JS for MCP Apps views, so each view is a single self-contained file. Three.js for the landing hero.
-- **29 Vitest tests:** planner ranking, allergen and dislike exclusion, cart and checkout (token, expiry, idempotent replay), MCP over real Streamable HTTP, the Bedrock tool loop against a scripted Converse mock, and the consent gate that blocks a model-initiated purchase.
+- **39 Vitest tests:** planner ranking, allergen and dislike exclusion, cart and checkout (token, expiry, idempotent replay), MCP over real Streamable HTTP, the Bedrock tool loop against a scripted Converse mock, the consent gate that blocks a model-initiated purchase, and offline small talk.
 - AI pair-programming with Claude Code for scaffolding and parallel workstreams.
 
 ### Challenges
@@ -147,7 +147,7 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
 - **What worked well:**
   - `StreamableHTTPServerTransport` plus Express gave us sessions (`Mcp-Session-Id`) with very little code.
   - `structuredContent` + `outputSchema` are exactly what a voice agent needs: short speech plus machine-readable data.
-  - Tool annotations (`destructiveHint` on checkout) map naturally to "ask before buying".
+  - Tool annotations (`openWorldHint` + `idempotentHint` on checkout, `readOnlyHint` on queries) map naturally to "ask before buying".
 - **What needs work:**
   - The spec has moved past 2025-11-25: the 2026-07-28 revision removes protocol sessions. The hackathon says "2025-11-25 or later, once confirmed", and it is unclear which later revisions Alexa+ accepts.
   - Tool input schemas generated from Zod are valid JSON Schema, but they are not directly portable to LLM tool APIs (see Bedrock below). A "portable schema" profile in the spec would help every agent host.
