@@ -74,7 +74,7 @@ body.trace-open .scene{padding-right:calc(var(--trace) + 24px)}
 .apphost iframe.out{opacity:0;transform:scale(1.01)}
 
 /* timers */
-.timers{position:absolute;top:10px;left:50%;transform:translateX(-50%);flex-direction:row!important;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:4;pointer-events:none}
+.timers{position:absolute;right:26px;bottom:calc((var(--strip-h) - 9px - 48px) / 2 + 9px);display:flex;flex-direction:row;align-items:center;gap:10px;z-index:4;pointer-events:none}
 .timer{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 6px;border-radius:999px;background:rgba(12,8,6,.82);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1.5px rgba(39,212,247,.5),0 12px 30px -10px rgba(0,0,0,.8);animation:tin .45s cubic-bezier(.2,.9,.3,1.3) both;cursor:default}
 .timer svg{width:36px;height:36px;transform:rotate(-90deg)}
 .timer .trk{stroke:rgba(255,255,255,.12)}.timer .arc{stroke:var(--cyan);transition:stroke-dashoffset 1s linear}
@@ -150,7 +150,7 @@ body.trace-open .trace{transform:none}
 .tr-list{flex:1;overflow:auto;padding:12px 14px 30px;display:flex;flex-direction:column;gap:12px}
 .tr-empty{font:600 14px/1.5 var(--sans);color:var(--dim);padding:10px 4px}
 .tr-empty code{font-family:var(--mono);color:var(--cyan)}
-.turn{border-radius:16px;background:rgba(255,246,236,.04);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:tin .3s ease both}
+.turn{flex:none;border-radius:16px;background:rgba(255,246,236,.04);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:tin .3s ease both}
 .turn-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .turn-h .q{flex:1;min-width:0;font:700 13px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .turn-h .src{font:800 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}

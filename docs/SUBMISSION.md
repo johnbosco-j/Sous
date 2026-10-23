@@ -27,10 +27,15 @@ Sous is an **Alexa+ add-on implemented as a self-hosted MCP server**. Alexa+ (or
 
 A typical evening with the demo household, the Riveras (Leo, 8, is allergic to peanuts; Ava, 5, won't eat mushrooms):
 
-1. **"Alexa, what should we cook tonight?"** `meal_suggest` ranks recipes by a *use-it-up score*. The score weights each ingredient by how close it is to expiry: spinach and cooked rice expire tomorrow, chicken thighs in two days. Recipes with dislikes are penalized. The Echo Show shows a carousel: *"Spinach & chickpea coconut curry: uses spinach (expires tomorrow), rice, tomatoes. Rescues $6.40."* Peanut Noodles is **removed, with the reason shown**: "Leo is allergic to peanuts."
+1. **"Alexa, what should we cook tonight?"** `meal_suggest` ranks recipes by a *use-it-up score*:
+   - each ingredient is weighted by how close it is to expiry (today 6, tomorrow 5, two days 3, three days 2, four days 1), scaled by how much of that at-risk stock the recipe clears;
+   - every missing ingredient costs points, and long recipes cost a little too;
+   - a recipe that contains a member's allergen or dislike is **set aside, with the reason shown**.
+
+   The Echo Show shows a carousel of cards like *"Spinach & Chickpea Coconut Curry: uses baby spinach and cooked rice (expire tomorrow)"*, each with the dollar value it rescues. Peanut Sesame Noodles is **removed**, and the card says why: "Leo is allergic to peanuts."
 2. **"Remember Ava doesn't like mushrooms."** `household_memory` stores it, and it persists across sessions and restarts.
-3. **"Add what we're missing to the cart."** `shopping_cart_build` diffs the recipe against the pantry. It returns an itemized cart from a simulated Amazon Fresh catalog and a one-time `cartToken`.
-4. **"Yes, place the order."** `shopping_checkout` will **only** place an order with that token and an explicit confirmation. Without both, it returns a `followUp` asking the user to confirm. The model cannot buy anything on its own.
+3. **"Add what we're missing to the cart."** (or **"Plan dinners for the next three nights"**, which chains `meal_suggest` → `meal_plan_set` → `shopping_cart_build`). `shopping_cart_build` compares the recipes with the pantry and rounds each item up to a whole pack. It returns an itemized cart from a simulated Amazon Fresh catalog and a `cartToken`.
+4. **"Yes, place the order."** `shopping_checkout` will **only** place an order with that token *and* `confirmed=true`. Without confirmation, it returns a `followUp` asking for it. Carts expire after 30 minutes, so prices can't go stale. Replaying a placed cart returns the same order and never a second one. The purchased groceries go straight into the pantry. The model cannot buy anything on its own.
 5. **"Let's cook the first one." / "Next step." / "Set a timer for 10 minutes."** `cook_start`, `cook_step` and `timer_set` run a hands-free cook mode. Each step gets a giant-type card, with step dots, an ingredient checklist and live timers.
 6. When you finish, the ingredients you used are deducted from the pantry. `impact_report` then shows **dollars rescued, kilograms of food saved, kg CO2e avoided** and a yearly projection.
 7. **"What can I make with yogurt, peppers and tortillas?"** `chef_improvise` asks **Amazon Bedrock** for a new recipe. A *deterministic* allergen guard checks the generated recipe before it is shown. If it contains an allergen, it is rejected.
@@ -51,10 +56,11 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 
 **MCP implementation details**
 - **Protocol 2025-11-25** over **Streamable HTTP**, with session management through `Mcp-Session-Id`.
-- Every tool declares a `title`, a Zod-generated `inputSchema`, an **`outputSchema`**, and behavior **annotations**:
-  - read-only tools (`pantry_check`, `meal_suggest`, `impact_report`) carry `readOnlyHint`;
-  - `shopping_checkout` is marked `destructiveHint` and `openWorldHint`;
-  - `pantry_update` is idempotent per request.
+- All 12 tools declare a `title`, a Zod-generated `inputSchema`, an **`outputSchema`**, **icons** (new in 2025-11-25, SEP-973), and behavior **annotations**:
+  - `pantry_check`, `meal_suggest` and `impact_report` are `readOnlyHint`;
+  - `shopping_checkout` is `openWorldHint` + `idempotentHint`, because replaying a token never orders twice;
+  - `chef_improvise` is `openWorldHint`, because it calls Bedrock.
+- Resources `sous://household`, `sous://pantry` and `sous://impact`, a resource template `sous://recipe/{id}`, and prompts `plan_tonight` and `use_it_up_week`.
 - Every result carries a short voice-safe `text` block **and** `structuredContent`. The structured envelope is `{ ok, tool, speech, view, data, followUp }`. `followUp` hands the agent the *exact* next call for confirmations, so "yes" on the next turn never depends on the model reconstructing arguments from speech.
 - **MCP Apps.** UI-bearing tools link a `ui://sous/<view>.html` resource through `_meta.ui.resourceUri`. There are five views: pantry, meals carousel, cook mode, cart/checkout and impact. They speak the MCP Apps postMessage protocol: `ui/initialize` → `ui/notifications/initialized` → `ui/notifications/tool-input` / `tool-result`. Buttons inside a card ("Cook this", "Add to cart", "Next") send `tools/call` back through the host, so touch and voice drive the same tools.
 - **Server `instructions`** tell the agent how to behave: speak the tool's text, ask the follow-up prompt, and never place an order without an explicit yes.
@@ -70,7 +76,7 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 These rules live in deterministic code, not in the prompt.
 - **Allergen guard.** Recipes containing a household member's allergen are excluded before ranking, and the reason is shown ("Leo is allergic to peanuts"). LLM-generated recipes from `chef_improvise` pass through the same guard before they are shown.
 - **Confirm-before-buy.** Checkout requires both the `cartToken` from the cart the user just saw and an explicit confirmation. A stale or altered cart is rejected. The order is clearly labeled *simulated*.
-- **Grounded answers.** Expiry dates, prices and quantities come from the pantry and catalog, never from the model.
+- **Grounded answers.** Expiry dates, prices and quantities come from the pantry and catalog, never from the model. Impact uses a fixed, documented factor of 2.5 kg CO2e per kg of food rescued.
 
 ### Potential impact
 - **Who:** any household with a smart display. Primary users are busy parents, households with food allergies and people cooking on a budget.
@@ -118,7 +124,7 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
 
    Every call is visible in the MCP trace drawer.
 2. **Amazon Bedrock inside a tool.** `chef_improvise` asks a Bedrock model to invent a recipe from the at-risk ingredients. The output is parsed to JSON and then passes the **deterministic allergen guard** before Sous will show or speak it. If Bedrock is unconfigured or times out, a template recipe is used instead. `structuredContent.data.suggestions[0].engine` records which path ran.
-3. **Auth.** Configure via `.env`: either a Bedrock API key (`AWS_BEARER_TOKEN_BEDROCK`) or the standard AWS credential chain, with `AWS_REGION` and `BEDROCK_MODEL_ID`.
+3. **Auth and config.** Configure via `.env`: either a Bedrock API key (`AWS_BEARER_TOKEN_BEDROCK`) or the standard AWS credential chain, plus `AWS_REGION` and `BEDROCK_MODEL_ID` (default: the Amazon Nova Pro inference profile `us.amazon.nova-pro-v1:0`). `SOUS_BEDROCK=auto|off` sets the mode. Each Bedrock call has a hard time budget (`BEDROCK_TIMEOUT_MS`, default 8 s), because a voice turn can't hang. The agent allows at most 4 tool rounds per turn.
 
 ## Open Source (optional entry)
 - **Repository URL:** https://github.com/johnbosco-j/sous (public, MIT license visible in the About section).
@@ -210,6 +216,8 @@ npm start                      # http://localhost:8787
 - **Landing page:** http://localhost:8787/
 - **Raw MCP endpoint:** http://localhost:8787/mcp (Streamable HTTP). Try `npx @modelcontextprotocol/inspector`, choose transport "Streamable HTTP", URL `http://localhost:8787/mcp`.
 - **Optional Bedrock:** copy `.env.example` to `.env`, then set `AWS_REGION`, `BEDROCK_MODEL_ID`, and either `AWS_BEARER_TOKEN_BEDROCK` or AWS credentials. Without them, the deterministic router and template recipes are used, and the badge in the trace drawer shows `rules`.
+- **Health check:** `GET /healthz` reports the protocol version, transport, tool count and Bedrock status.
+- **Reset demo data:** the "Reset demo" control in the simulator, or `POST /api/reset`.
 - **Tests:** `npm test`
 - All demo data is synthetic. Orders are simulated, and nothing is purchased.
 

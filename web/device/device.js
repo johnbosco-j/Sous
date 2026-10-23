@@ -187,6 +187,8 @@ function setTimers(list) {
 }
 function tickTimers() {
   const now = Date.now();
+  // Keep the caption text clear of the timer chips that share the Alexa strip.
+  $('caption').style.paddingRight = (timers.size ? $('timers').offsetWidth + 52 : 36) + 'px';
   for (const t of timers.values()) {
     const left = Math.max(0, t.endsAt - now);
     const s = Math.ceil(left / 1000);

@@ -195,7 +195,8 @@ Sous.bind(document.getElementById('next'), 'cook_step', { action: 'next' });
 Sous.bind(document.getElementById('back'), 'cook_step', { action: 'back' });
 Sous.bind(document.getElementById('impact'), 'impact_report', {});
 Sous.bind(document.getElementById('timer'), 'timer_set', function () {
-  return { label: (state && state.title ? state.title.split(' ').slice(0, 2).join(' ') + ': step ' + (state.stepIndex + 1) : 'Kitchen timer'), seconds: (state && state.step && state.step.timerSeconds) || 300 };
+  var words = state && state.title ? state.title.split(' ').filter(function (w) { return /[a-z]/i.test(w); }) : [];
+  return { label: words.length ? words.slice(0, 2).join(' ') + ' · step ' + (state.stepIndex + 1) : 'Kitchen timer', seconds: (state && state.step && state.step.timerSeconds) || 300 };
 });
 function confetti() {
   var host = document.getElementById('done'), cols = ['#f6a72a', '#ef563c', '#5fca81', '#27d4f7', '#b07cff', '#fff6ec'];
@@ -240,7 +241,7 @@ Sous.onResult(function (r) {
   var tb = document.getElementById('timer'); tb.hidden = !step.timerSeconds;
   if (step.timerSeconds) { var m = Math.round(step.timerSeconds / 60); tb.textContent = '⏱  Start a ' + (m >= 1 ? m + '-minute' : step.timerSeconds + '-second') + ' timer'; }
   document.getElementById('back').disabled = i === 0; document.getElementById('back').style.opacity = i === 0 ? .35 : 1;
-  document.getElementById('next').textContent = i >= n - 1 ? 'Finish ✓' : 'Next step ›';
+  document.getElementById('next').textContent = i >= n - 1 ? 'Next · finish ✓' : 'Next step ›';
   document.getElementById('ing').innerHTML = (d.ingredients || []).map(function (x) {
     return '<li><span class="ck' + (x.have ? '' : ' no') + '">' + (x.have ? '✓' : '!') + '</span>' + Sous.esc(x.name) + '<small>' + Sous.esc(Sous.qty(x.qty, x.unit)) + '</small></li>';
   }).join('');
