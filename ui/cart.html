@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous · Cart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16100d;--bg2:#1f1712;--card:#2a1f19;--card2:#33261e;--line:rgba(255,236,214,.10);--line2:rgba(255,236,214,.18);
+  --text:#fff6ec;--muted:#cdb9a8;--dim:#93806f;
+  --saffron:#f6a72a;--tomato:#ef563c;--basil:#5fca81;--cyan:#27d4f7;--plum:#b07cff;
+  --urgent:#ff5d4f;--soon:#ffb547;--fresh:#62d48f;--expired:#8a7a70;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
+             radial-gradient(800px 480px at -8% 112%,rgba(239,86,60,.15),transparent 60%),var(--bg)}
+button{font-family:inherit}
+.eyebrow{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--saffron)}
+.h1{font-family:var(--serif);font-weight:600;font-size:54px;line-height:1.02;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+.h1 em{font-style:italic;color:var(--saffron)}
+.sub{font-size:21px;color:var(--muted);line-height:1.35}
+.btn{appearance:none;border:0;border-radius:999px;padding:17px 28px;font:800 21px/1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+  transition:transform .15s ease,filter .15s ease,background .2s ease,opacity .2s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--saffron),var(--tomato));color:#1d0f07;box-shadow:0 12px 30px -12px rgba(239,86,60,.8)}
+.btn-ghost{background:rgba(255,246,236,.07);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn-sm{padding:13px 20px;font-size:18px}
+.btn.loading{opacity:.6;pointer-events:none}
+.btn.loading::after{content:"";width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;font:700 16px/1 var(--sans);background:rgba(255,246,236,.07);box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.u-urgent{color:var(--urgent)}.u-soon{color:var(--soon)}.u-fresh{color:var(--fresh)}.u-expired{color:var(--expired)}
+.bg-urgent{background:var(--urgent)}.bg-soon{background:var(--soon)}.bg-fresh{background:var(--fresh)}.bg-expired{background:var(--expired)}
+.voicehint{font:600 17px/1 var(--sans);color:var(--dim)}
+.voicehint b{color:var(--cyan);font-weight:800}
+.wait{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim);font:600 20px var(--sans)}
+.wait i{display:inline-block;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--saffron);animation:bob 1s ease-in-out infinite}
+.wait i:nth-child(2){animation-delay:.15s}.wait i:nth-child(3){animation-delay:.3s}
+.err{position:fixed;left:24px;right:24px;bottom:24px;padding:14px 18px;border-radius:14px;background:rgba(239,86,60,.16);color:#ffd0c6;font:600 16px var(--sans);box-shadow:inset 0 0 0 1px rgba(239,86,60,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-8px);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,93,79,.0)}50%{box-shadow:0 0 0 6px rgba(255,93,79,.18)}}
+.rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+<style>
+.wrap{position:absolute;inset:0;padding:40px 44px 30px;display:grid;grid-template-columns:1fr 430px;gap:28px}
+.left{min-height:0;display:flex;flex-direction:column;gap:20px}
+.left .h1{margin-top:12px;font-size:50px}
+.lines{flex:1;min-height:0;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:10px}
+.line{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:16px;padding:12px 18px 12px 12px;border-radius:20px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
+.line .e{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:38px;background:rgba(255,246,236,.06)}
+.line .n{font:800 22px/1.15 var(--sans)}
+.line .f{margin-top:6px;font:600 15px/1.2 var(--sans);color:var(--dim)}
+.line .f b{color:var(--saffron);font-weight:700}
+.line .p{text-align:right;font-family:var(--serif);font-weight:600;font-size:26px}
+.line .p small{display:block;font:700 14px var(--sans);color:var(--dim)}
+.sum{position:relative;display:flex;flex-direction:column;gap:16px;padding:28px 28px 26px;border-radius:32px;background:linear-gradient(170deg,#2f241d,#211913);box-shadow:inset 0 0 0 1px var(--line2),0 30px 70px -40px rgba(0,0,0,.9);overflow:hidden;transition:background .5s}
+.store{display:flex;align-items:center;gap:12px;font:800 18px/1.2 var(--sans)}
+.store .logo{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,var(--basil),#1f8a70)}
+.store small{display:block;font:600 14px var(--sans);color:var(--dim);margin-top:3px}
+.row{display:flex;justify-content:space-between;font:700 19px var(--sans);color:var(--muted)}
+.hr{height:1px;background:var(--line2)}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total span{font:800 18px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.total b{font-family:var(--serif);font-weight:600;font-size:60px;line-height:1;letter-spacing:-.02em}
+.confirm{margin-top:auto;display:flex;flex-direction:column;gap:14px}
+.lock{padding:14px 16px;border-radius:16px;background:rgba(246,167,42,.12);box-shadow:inset 0 0 0 1px rgba(246,167,42,.35);font:700 17px/1.4 var(--sans);color:#ffe1b0}
+.lock b{color:var(--cyan)}
+.confirm .btn{justify-content:center;padding:20px;font-size:22px}
+.placed{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:30px;
+  background:linear-gradient(170deg,#173a28,#0f2a1d);animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.placed[hidden]{display:none}
+.check{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:var(--basil);box-shadow:0 0 0 14px rgba(95,202,129,.18),0 0 0 30px rgba(95,202,129,.08);animation:pop .7s cubic-bezier(.2,.9,.3,1.4) both}
+.check svg{width:62px;height:62px}
+.check path{stroke:#0f2a1d;stroke-width:9;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:draw .6s .35s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.placed h2{font-family:var(--serif);font-weight:600;font-size:46px;line-height:1.05;margin-top:16px}
+.placed .oid{font:800 18px var(--sans);letter-spacing:.12em;color:#b9f0cb}
+.placed p{font:600 20px/1.4 var(--sans);color:#d4f5df}
+.placed .sim{margin-top:6px;font:600 14px var(--sans);color:rgba(212,245,223,.6)}
+</style></head>
+<body>
+<div class="wait">Building your cart <i></i><i></i><i></i></div>
+<main class="wrap" id="app" hidden>
+  <section class="left rise">
+    <div><div class="eyebrow" id="eyebrow">Shopping cart · for this week’s plan</div><h1 class="h1" id="headline"></h1></div>
+    <div class="lines" id="lines"></div>
+  </section>
+  <aside class="sum rise" style="animation-delay:120ms">
+    <div class="store"><div class="logo">🛒</div><div><span id="store"></span><small id="window"></small></div></div>
+    <div class="hr"></div>
+    <div class="row"><span>Subtotal</span><span id="subtotal"></span></div>
+    <div class="row"><span>Delivery</span><span id="fee"></span></div>
+    <div class="hr"></div>
+    <div class="total"><span>Total</span><b id="total"></b></div>
+    <div class="confirm" id="confirm">
+      <div class="lock">🔒 Nothing is ordered until you confirm.<br>Say <b>“Yes, place the order”</b></div>
+      <button class="btn btn-primary" id="place"></button>
+    </div>
+    <div class="placed" id="placed" hidden>
+      <div class="check"><svg viewBox="0 0 64 64"><path d="M16 33 L28 45 L49 21"/></svg></div>
+      <h2>Order placed</h2>
+      <div class="oid" id="oid"></div>
+      <p id="eta"></p>
+      <div class="sim">Simulated order · no real purchase was made</div>
+    </div>
+  </aside>
+</main>
+<script>window.__SOUS_SAMPLE__={"content":[{"type":"text","text":"Cart ready."}],"structuredContent":{"ok":true,"tool":"shopping_cart_build","speech":"Cart ready.","view":"cart","followUp":{"prompt":"Should I place the order?","tool":"shopping_checkout","arguments":{"cartToken":"ct_8f2a1c","confirmed":true}},"data":{"cartToken":"ct_8f2a1c","status":"draft","store":"Amazon Fresh (simulated)","deliveryWindow":"Today, 5–7 PM","lines":[{"sku":"AF-CUC-01","name":"Cucumber","emoji":"🥒","qty":1,"unit":"","priceUsd":0.89,"forRecipes":["Tzatziki Chicken Bowls"]},{"sku":"AF-PIT-06","name":"Pita bread","emoji":"🫓","qty":1,"unit":"pack","priceUsd":3.29,"forRecipes":["Tzatziki Chicken Bowls"]},{"sku":"AF-PEA-12","name":"Frozen peas","emoji":"🫛","qty":1,"unit":"bag","priceUsd":2.49,"forRecipes":["Egg Fried Rice with Peppers"]},{"sku":"AF-DIL-02","name":"Fresh dill","emoji":"🌿","qty":1,"unit":"bunch","priceUsd":1.99,"forRecipes":["Tzatziki Chicken Bowls"]}],"subtotalUsd":8.66,"deliveryFeeUsd":3.99,"totalUsd":12.65}}};</script>
+<script>
+/* Sous MCP App view runtime: the view side of the MCP Apps (SEP-1865) postMessage JSON-RPC bridge. */
+(function () {
+  var pending = new Map(), nextId = 2, initialized = false, renderer = null, last = null, got = false;
+  function post(m) { try { window.parent.postMessage(m, '*'); } catch (e) {} }
+  function showErr(e) {
+    var el = document.querySelector('.err') || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'err' }));
+    el.textContent = 'View error: ' + (e && e.message ? e.message : e);
+  }
+  function handle(result) {
+    got = true; last = result;
+    var w = document.querySelector('.wait'); if (w) w.remove();
+    if (renderer) { try { renderer(result); } catch (e) { console.error(e); showErr(e); } }
+  }
+  window.addEventListener('message', function (ev) {
+    var m = ev.data;
+    if (!m || typeof m !== 'object' || m.jsonrpc !== '2.0') return;
+    if (m.method === 'ui/notifications/tool-result') { handle(m.params); return; }
+    if (m.method) return; // tool-input, host-context-changed, etc.: nothing to do
+    if (m.id === 1 && !initialized) { initialized = true; post({ jsonrpc: '2.0', method: 'ui/notifications/initialized' }); return; }
+    var p = pending.get(m.id);
+    if (p) { pending.delete(m.id); m.error ? p.reject(m.error) : p.resolve(m.result); }
+  });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.Sous = {
+    onResult: function (fn) { renderer = fn; if (last) handle(last); },
+    callTool: function (name, args) {
+      var id = nextId++;
+      post({ jsonrpc: '2.0', id: id, method: 'tools/call', params: { name: name, arguments: args || {} } });
+      return new Promise(function (res, rej) {
+        pending.set(id, { resolve: res, reject: rej });
+        setTimeout(function () { if (pending.has(id)) { pending.delete(id); rej(new Error('Host did not answer')); } }, 30000);
+      });
+    },
+    /** Wire a button to a tool call with a loading state. */
+    bind: function (btn, name, args) {
+      btn.addEventListener('click', function () {
+        btn.classList.add('loading');
+        Sous.callTool(name, typeof args === 'function' ? args() : args)
+          .catch(function (e) { console.warn(e); })
+          .finally(function () { setTimeout(function () { btn.classList.remove('loading'); }, 400); });
+      });
+    },
+    sc: function (r) { return (r && r.structuredContent) || {}; },
+    data: function (r) { return ((r && r.structuredContent) || {}).data || {}; },
+    esc: esc,
+    money: function (n) { n = Number(n) || 0; return '$' + n.toFixed(2).replace(/\.00$/, '.00'); },
+    when: function (d) {
+      if (d == null) return 'No date';
+      if (d < 0) return 'Expired';
+      if (d === 0) return 'Today';
+      if (d === 1) return 'Tomorrow';
+      return d + ' days';
+    },
+    urgency: function (d) { return d == null ? 'fresh' : d < 0 ? 'expired' : d <= 1 ? 'urgent' : d <= 3 ? 'soon' : 'fresh'; },
+    qty: function (q, u) { if (q == null || q === '') return u || ''; var s = String(Math.round(q * 100) / 100); return u ? s + ' ' + u : s; }
+  };
+  post({ jsonrpc: '2.0', id: 1, method: 'ui/initialize', params: { appInfo: { name: 'sous-view', version: '1' }, appCapabilities: {}, protocolVersion: '2026-01-26' } });
+  // Opened directly (no host): render the embedded sample so the view can be previewed on its own.
+  window.addEventListener('load', function () {
+    setTimeout(function () { if (!got && window.parent === window && window.__SOUS_SAMPLE__) handle(window.__SOUS_SAMPLE__); }, 50);
+  });
+})();
+</script>
+<script>
+var cart = null;
+Sous.bind(document.getElementById('place'), 'shopping_checkout', function () { return { cartToken: cart && cart.cartToken, confirmed: true }; });
+Sous.onResult(function (r) {
+  var d = Sous.data(r); cart = d;
+  var lines = d.lines || [];
+  var count = lines.reduce(function (s, l) { return s + (Number(l.qty) || 1); }, 0);
+  document.getElementById('headline').innerHTML = lines.length
+    ? lines.length + ' item' + (lines.length === 1 ? '' : 's') + ' to finish <em>the plan</em>'
+    : 'Your pantry has <em>everything</em>';
+  document.getElementById('lines').innerHTML = lines.map(function (l, n) {
+    return '<div class="line rise" style="animation-delay:' + (n * 60) + 'ms"><div class="e">' + Sous.esc(l.emoji || '🛍️') + '</div>' +
+      '<div><div class="n">' + Sous.esc(l.name) + '</div><div class="f">' + Sous.esc(Sous.qty(l.qty, l.unit)) +
+      ((l.forRecipes || []).length ? ' · for <b>' + l.forRecipes.map(Sous.esc).join(', ') + '</b>' : '') + '</div></div>' +
+      '<div class="p">' + Sous.money(l.priceUsd * (Number(l.qty) || 1)) + (Number(l.qty) > 1 ? '<small>' + Sous.money(l.priceUsd) + ' each</small>' : '') + '</div></div>';
+  }).join('');
+  document.getElementById('store').textContent = d.store || 'Amazon Fresh (simulated)';
+  document.getElementById('window').textContent = d.deliveryWindow ? 'Delivery · ' + d.deliveryWindow : '';
+  document.getElementById('subtotal').textContent = Sous.money(d.subtotalUsd);
+  document.getElementById('fee').textContent = d.deliveryFeeUsd ? Sous.money(d.deliveryFeeUsd) : 'Free';
+  document.getElementById('total').textContent = Sous.money(d.totalUsd);
+  document.getElementById('place').textContent = 'Place order · ' + Sous.money(d.totalUsd);
+  var placed = d.status === 'placed';
+  document.getElementById('eyebrow').textContent = placed ? 'Order confirmed' : 'Shopping cart · for this week’s plan';
+  document.getElementById('confirm').hidden = placed || !lines.length;
+  document.getElementById('placed').hidden = !placed;
+  if (placed) {
+    document.getElementById('oid').textContent = 'ORDER ' + (d.orderId || '');
+    document.getElementById('eta').textContent = 'Arrives ' + (d.eta || d.deliveryWindow || 'soon');
+  }
+  document.getElementById('app').hidden = false;
+});
+</script>
+</body></html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous · Cook mode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16100d;--bg2:#1f1712;--card:#2a1f19;--card2:#33261e;--line:rgba(255,236,214,.10);--line2:rgba(255,236,214,.18);
+  --text:#fff6ec;--muted:#cdb9a8;--dim:#93806f;
+  --saffron:#f6a72a;--tomato:#ef563c;--basil:#5fca81;--cyan:#27d4f7;--plum:#b07cff;
+  --urgent:#ff5d4f;--soon:#ffb547;--fresh:#62d48f;--expired:#8a7a70;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
+             radial-gradient(800px 480px at -8% 112%,rgba(239,86,60,.15),transparent 60%),var(--bg)}
+button{font-family:inherit}
+.eyebrow{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--saffron)}
+.h1{font-family:var(--serif);font-weight:600;font-size:54px;line-height:1.02;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+.h1 em{font-style:italic;color:var(--saffron)}
+.sub{font-size:21px;color:var(--muted);line-height:1.35}
+.btn{appearance:none;border:0;border-radius:999px;padding:17px 28px;font:800 21px/1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+  transition:transform .15s ease,filter .15s ease,background .2s ease,opacity .2s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--saffron),var(--tomato));color:#1d0f07;box-shadow:0 12px 30px -12px rgba(239,86,60,.8)}
+.btn-ghost{background:rgba(255,246,236,.07);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn-sm{padding:13px 20px;font-size:18px}
+.btn.loading{opacity:.6;pointer-events:none}
+.btn.loading::after{content:"";width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;font:700 16px/1 var(--sans);background:rgba(255,246,236,.07);box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.u-urgent{color:var(--urgent)}.u-soon{color:var(--soon)}.u-fresh{color:var(--fresh)}.u-expired{color:var(--expired)}
+.bg-urgent{background:var(--urgent)}.bg-soon{background:var(--soon)}.bg-fresh{background:var(--fresh)}.bg-expired{background:var(--expired)}
+.voicehint{font:600 17px/1 var(--sans);color:var(--dim)}
+.voicehint b{color:var(--cyan);font-weight:800}
+.wait{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim);font:600 20px var(--sans)}
+.wait i{display:inline-block;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--saffron);animation:bob 1s ease-in-out infinite}
+.wait i:nth-child(2){animation-delay:.15s}.wait i:nth-child(3){animation-delay:.3s}
+.err{position:fixed;left:24px;right:24px;bottom:24px;padding:14px 18px;border-radius:14px;background:rgba(239,86,60,.16);color:#ffd0c6;font:600 16px var(--sans);box-shadow:inset 0 0 0 1px rgba(239,86,60,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-8px);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,93,79,.0)}50%{box-shadow:0 0 0 6px rgba(255,93,79,.18)}}
+.rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+<style>
+.wrap{position:absolute;inset:0;padding:34px 44px 30px;display:grid;grid-template-rows:auto 1fr auto;gap:22px}
+.bar{display:flex;align-items:center;gap:18px}
+.badge{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 12px 30px -14px var(--g2)}
+.ttl{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.05}
+.count{margin-top:6px;font:800 15px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--saffron)}
+.dots{margin-left:auto;display:flex;gap:8px}
+.dots i{width:34px;height:10px;border-radius:999px;background:rgba(255,246,236,.14);transition:background .3s,width .3s}
+.dots i.done{background:rgba(246,167,42,.55)}
+.dots i.on{width:58px;background:linear-gradient(90deg,var(--saffron),var(--tomato))}
+.main{min-height:0;display:grid;grid-template-columns:1fr 330px;gap:26px}
+.stepbox{position:relative;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:34px 40px;border-radius:32px;
+  background:linear-gradient(160deg,rgba(255,246,236,.07),rgba(255,246,236,.02));box-shadow:inset 0 0 0 1px var(--line)}
+.stepno{position:absolute;top:22px;left:40px;font:800 15px/1 var(--sans);letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.steptext{font-family:var(--serif);font-weight:500;font-size:50px;line-height:1.12;letter-spacing:-.015em}
+.steptext.m{font-size:42px}.steptext.s{font-size:35px}
+.tip{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;border-radius:16px;background:rgba(246,167,42,.10);box-shadow:inset 0 0 0 1px rgba(246,167,42,.28);font:600 19px/1.35 var(--sans);color:#ffe1b0}
+.timerbtn{align-self:flex-start}
+.ing{min-height:0;display:flex;flex-direction:column;padding:22px 22px 18px;border-radius:28px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
+.ing h3{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+.ing ul{list-style:none;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:4px}
+.ing li{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line);font:700 18px/1.2 var(--sans)}
+.ing li:last-child{border-bottom:0}
+.ck{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:15px;background:rgba(95,202,129,.2);color:var(--basil)}
+.ck.no{background:rgba(255,181,71,.16);color:var(--soon)}
+.ing small{margin-left:auto;color:var(--dim);font-weight:600;font-size:15px;white-space:nowrap}
+.ctrls{display:flex;align-items:center;gap:14px}
+.ctrls .grow{flex:1;text-align:center}
+.next{padding:20px 34px;font-size:23px}
+/* done state */
+.done{position:absolute;inset:0;display:grid;place-items:center;text-align:center;overflow:hidden}
+.done[hidden]{display:none}
+.done .inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 60px}
+.done .big{font-size:110px;animation:pop .7s cubic-bezier(.2,.9,.3,1.4) both}
+.done h1{font-family:var(--serif);font-weight:600;font-size:76px;line-height:1;letter-spacing:-.02em}
+.done h1 em{color:var(--saffron)}
+.done p{font:600 23px/1.4 var(--sans);color:var(--muted);max-width:820px}
+.done p b{color:var(--text)}
+.saved{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:900px}
+.saved .chip{font-size:18px;padding:11px 16px;color:var(--text)}
+.saved .chip b{color:var(--basil)}
+.conf{position:absolute;top:-30px;width:12px;height:22px;border-radius:3px;opacity:.9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(900px) rotate(720deg);opacity:.9}}
+</style></head>
+<body>
+<div class="wait">Getting the kitchen ready <i></i><i></i><i></i></div>
+<main class="wrap" id="app" hidden>
+  <header class="bar rise">
+    <div class="badge" id="emoji"></div>
+    <div><div class="ttl" id="title"></div><div class="count" id="count"></div></div>
+    <div class="dots" id="dots"></div>
+  </header>
+  <section class="main">
+    <div class="stepbox rise" id="stepbox">
+      <div class="stepno" id="stepno"></div>
+      <div class="steptext" id="steptext"></div>
+      <div class="tip" id="tip" hidden><span>💡</span><span id="tiptext"></span></div>
+      <button class="btn btn-ghost timerbtn" id="timer" hidden></button>
+    </div>
+    <aside class="ing rise"><h3>Ingredients</h3><ul id="ing"></ul></aside>
+  </section>
+  <footer class="ctrls">
+    <button class="btn btn-ghost" id="back">‹ Back</button>
+    <div class="grow voicehint">Say <b>“next”</b>, <b>“repeat that”</b> or <b>“set a timer”</b></div>
+    <button class="btn btn-primary next" id="next">Next step ›</button>
+  </footer>
+</main>
+<section class="done" id="done" hidden>
+  <div class="inner">
+    <div class="big" id="doneEmoji">🍛</div>
+    <h1>Dinner’s <em>ready.</em></h1>
+    <p id="doneText"></p>
+    <div class="saved" id="saved"></div>
+    <button class="btn btn-primary" id="impact">See what we’ve saved →</button>
+  </div>
+</section>
+<script>window.__SOUS_SAMPLE__={"content":[{"type":"text","text":"Step 1."}],"structuredContent":{"ok":true,"tool":"cook_start","speech":"Step 1.","view":"cook","data":{"recipeId":"r_curry","title":"Spinach & Chickpea Coconut Curry","emoji":"🍛","gradient":["#f5a524","#ef553b"],"stepIndex":0,"totalSteps":5,"step":{"text":"Warm 2 tablespoons of oil in a large pan. Add the diced onion and cook until soft and golden.","timerSeconds":300,"tip":"Medium heat. You want soft and sweet, not brown."},"ingredients":[{"name":"Spinach","qty":1,"unit":"bag","have":true},{"name":"Cooked rice","qty":3,"unit":"cups","have":true},{"name":"Chickpeas","qty":1,"unit":"can","have":true},{"name":"Coconut milk","qty":1,"unit":"can","have":true},{"name":"Tomatoes","qty":2,"unit":"","have":true},{"name":"Onion","qty":1,"unit":"","have":true},{"name":"Garlic","qty":2,"unit":"cloves","have":true},{"name":"Curry powder","qty":2,"unit":"tbsp","have":true}],"done":false}}};</script>
+<script>
+/* Sous MCP App view runtime: the view side of the MCP Apps (SEP-1865) postMessage JSON-RPC bridge. */
+(function () {
+  var pending = new Map(), nextId = 2, initialized = false, renderer = null, last = null, got = false;
+  function post(m) { try { window.parent.postMessage(m, '*'); } catch (e) {} }
+  function showErr(e) {
+    var el = document.querySelector('.err') || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'err' }));
+    el.textContent = 'View error: ' + (e && e.message ? e.message : e);
+  }
+  function handle(result) {
+    got = true; last = result;
+    var w = document.querySelector('.wait'); if (w) w.remove();
+    if (renderer) { try { renderer(result); } catch (e) { console.error(e); showErr(e); } }
+  }
+  window.addEventListener('message', function (ev) {
+    var m = ev.data;
+    if (!m || typeof m !== 'object' || m.jsonrpc !== '2.0') return;
+    if (m.method === 'ui/notifications/tool-result') { handle(m.params); return; }
+    if (m.method) return; // tool-input, host-context-changed, etc.: nothing to do
+    if (m.id === 1 && !initialized) { initialized = true; post({ jsonrpc: '2.0', method: 'ui/notifications/initialized' }); return; }
+    var p = pending.get(m.id);
+    if (p) { pending.delete(m.id); m.error ? p.reject(m.error) : p.resolve(m.result); }
+  });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.Sous = {
+    onResult: function (fn) { renderer = fn; if (last) handle(last); },
+    callTool: function (name, args) {
+      var id = nextId++;
+      post({ jsonrpc: '2.0', id: id, method: 'tools/call', params: { name: name, arguments: args || {} } });
+      return new Promise(function (res, rej) {
+        pending.set(id, { resolve: res, reject: rej });
+        setTimeout(function () { if (pending.has(id)) { pending.delete(id); rej(new Error('Host did not answer')); } }, 30000);
+      });
+    },
+    /** Wire a button to a tool call with a loading state. */
+    bind: function (btn, name, args) {
+      btn.addEventListener('click', function () {
+        btn.classList.add('loading');
+        Sous.callTool(name, typeof args === 'function' ? args() : args)
+          .catch(function (e) { console.warn(e); })
+          .finally(function () { setTimeout(function () { btn.classList.remove('loading'); }, 400); });
+      });
+    },
+    sc: function (r) { return (r && r.structuredContent) || {}; },
+    data: function (r) { return ((r && r.structuredContent) || {}).data || {}; },
+    esc: esc,
+    money: function (n) { n = Number(n) || 0; return '$' + n.toFixed(2).replace(/\.00$/, '.00'); },
+    when: function (d) {
+      if (d == null) return 'No date';
+      if (d < 0) return 'Expired';
+      if (d === 0) return 'Today';
+      if (d === 1) return 'Tomorrow';
+      return d + ' days';
+    },
+    urgency: function (d) { return d == null ? 'fresh' : d < 0 ? 'expired' : d <= 1 ? 'urgent' : d <= 3 ? 'soon' : 'fresh'; },
+    qty: function (q, u) { if (q == null || q === '') return u || ''; var s = String(Math.round(q * 100) / 100); return u ? s + ' ' + u : s; }
+  };
+  post({ jsonrpc: '2.0', id: 1, method: 'ui/initialize', params: { appInfo: { name: 'sous-view', version: '1' }, appCapabilities: {}, protocolVersion: '2026-01-26' } });
+  // Opened directly (no host): render the embedded sample so the view can be previewed on its own.
+  window.addEventListener('load', function () {
+    setTimeout(function () { if (!got && window.parent === window && window.__SOUS_SAMPLE__) handle(window.__SOUS_SAMPLE__); }, 50);
+  });
+})();
+</script>
+<script>
+var state = null;
+Sous.bind(document.getElementById('next'), 'cook_step', { action: 'next' });
+Sous.bind(document.getElementById('back'), 'cook_step', { action: 'back' });
+Sous.bind(document.getElementById('impact'), 'impact_report', {});
+Sous.bind(document.getElementById('timer'), 'timer_set', function () {
+  return { label: (state && state.title ? state.title.split(' ').slice(0, 2).join(' ') + ': step ' + (state.stepIndex + 1) : 'Kitchen timer'), seconds: (state && state.step && state.step.timerSeconds) || 300 };
+});
+function confetti() {
+  var host = document.getElementById('done'), cols = ['#f6a72a', '#ef563c', '#5fca81', '#27d4f7', '#b07cff', '#fff6ec'];
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (var i = 0; i < 70; i++) {
+    var c = document.createElement('i'); c.className = 'conf';
+    c.style.left = Math.random() * 100 + '%'; c.style.background = cols[i % cols.length];
+    c.style.animationDuration = (2.2 + Math.random() * 2.2) + 's'; c.style.animationDelay = (Math.random() * .8) + 's';
+    c.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    host.appendChild(c);
+  }
+}
+Sous.onResult(function (r) {
+  var d = Sous.data(r); state = d;
+  var g = d.gradient || ['#f6a72a', '#ef563c'];
+  document.documentElement.style.setProperty('--g1', g[0]); document.documentElement.style.setProperty('--g2', g[1]);
+  if (d.done) {
+    document.getElementById('app').hidden = true;
+    var done = document.getElementById('done'); done.hidden = false;
+    done.querySelectorAll('.conf').forEach(function (c) { c.remove(); });
+    document.getElementById('doneEmoji').textContent = d.emoji || '🍽️';
+    var rescued = d.rescued || [], tot = rescued.reduce(function (s, x) { return s + (x.valueUsd || 0); }, 0);
+    document.getElementById('doneText').innerHTML = rescued.length
+      ? Sous.esc(d.title) + ' rescued <b>' + Sous.money(tot) + '</b> of food that was about to go in the bin.'
+      : 'Enjoy your ' + Sous.esc(d.title) + '.';
+    document.getElementById('saved').innerHTML = rescued.map(function (x) { return '<span class="chip">♻️ ' + Sous.esc(x.name) + ' <b>' + Sous.money(x.valueUsd) + '</b></span>'; }).join('');
+    confetti();
+    return;
+  }
+  document.getElementById('done').hidden = true;
+  var n = d.totalSteps || 1, i = d.stepIndex || 0, step = d.step || {};
+  document.getElementById('emoji').textContent = d.emoji || '🍳';
+  document.getElementById('title').textContent = d.title || '';
+  document.getElementById('count').textContent = 'Step ' + (i + 1) + ' of ' + n;
+  document.getElementById('stepno').textContent = 'Step ' + (i + 1);
+  var dots = ''; for (var k = 0; k < n; k++) dots += '<i class="' + (k < i ? 'done' : k === i ? 'on' : '') + '"></i>';
+  document.getElementById('dots').innerHTML = dots;
+  var st = document.getElementById('steptext'), text = step.text || '';
+  st.textContent = text; st.className = 'steptext' + (text.length > 190 ? ' s' : text.length > 120 ? ' m' : '');
+  var box = document.getElementById('stepbox'); box.classList.remove('rise'); void box.offsetWidth; box.classList.add('rise');
+  var tip = document.getElementById('tip'); tip.hidden = !step.tip; document.getElementById('tiptext').textContent = step.tip || '';
+  var tb = document.getElementById('timer'); tb.hidden = !step.timerSeconds;
+  if (step.timerSeconds) { var m = Math.round(step.timerSeconds / 60); tb.textContent = '⏱  Start a ' + (m >= 1 ? m + '-minute' : step.timerSeconds + '-second') + ' timer'; }
+  document.getElementById('back').disabled = i === 0; document.getElementById('back').style.opacity = i === 0 ? .35 : 1;
+  document.getElementById('next').textContent = i >= n - 1 ? 'Finish ✓' : 'Next step ›';
+  document.getElementById('ing').innerHTML = (d.ingredients || []).map(function (x) {
+    return '<li><span class="ck' + (x.have ? '' : ' no') + '">' + (x.have ? '✓' : '!') + '</span>' + Sous.esc(x.name) + '<small>' + Sous.esc(Sous.qty(x.qty, x.unit)) + '</small></li>';
+  }).join('');
+  document.getElementById('app').hidden = false;
+});
+</script>
+</body></html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous · Pantry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16100d;--bg2:#1f1712;--card:#2a1f19;--card2:#33261e;--line:rgba(255,236,214,.10);--line2:rgba(255,236,214,.18);
+  --text:#fff6ec;--muted:#cdb9a8;--dim:#93806f;
+  --saffron:#f6a72a;--tomato:#ef563c;--basil:#5fca81;--cyan:#27d4f7;--plum:#b07cff;
+  --urgent:#ff5d4f;--soon:#ffb547;--fresh:#62d48f;--expired:#8a7a70;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
+             radial-gradient(800px 480px at -8% 112%,rgba(239,86,60,.15),transparent 60%),var(--bg)}
+button{font-family:inherit}
+.eyebrow{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--saffron)}
+.h1{font-family:var(--serif);font-weight:600;font-size:54px;line-height:1.02;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+.h1 em{font-style:italic;color:var(--saffron)}
+.sub{font-size:21px;color:var(--muted);line-height:1.35}
+.btn{appearance:none;border:0;border-radius:999px;padding:17px 28px;font:800 21px/1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+  transition:transform .15s ease,filter .15s ease,background .2s ease,opacity .2s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--saffron),var(--tomato));color:#1d0f07;box-shadow:0 12px 30px -12px rgba(239,86,60,.8)}
+.btn-ghost{background:rgba(255,246,236,.07);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn-sm{padding:13px 20px;font-size:18px}
+.btn.loading{opacity:.6;pointer-events:none}
+.btn.loading::after{content:"";width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;font:700 16px/1 var(--sans);background:rgba(255,246,236,.07);box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.u-urgent{color:var(--urgent)}.u-soon{color:var(--soon)}.u-fresh{color:var(--fresh)}.u-expired{color:var(--expired)}
+.bg-urgent{background:var(--urgent)}.bg-soon{background:var(--soon)}.bg-fresh{background:var(--fresh)}.bg-expired{background:var(--expired)}
+.voicehint{font:600 17px/1 var(--sans);color:var(--dim)}
+.voicehint b{color:var(--cyan);font-weight:800}
+.wait{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim);font:600 20px var(--sans)}
+.wait i{display:inline-block;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--saffron);animation:bob 1s ease-in-out infinite}
+.wait i:nth-child(2){animation-delay:.15s}.wait i:nth-child(3){animation-delay:.3s}
+.err{position:fixed;left:24px;right:24px;bottom:24px;padding:14px 18px;border-radius:14px;background:rgba(239,86,60,.16);color:#ffd0c6;font:600 16px var(--sans);box-shadow:inset 0 0 0 1px rgba(239,86,60,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-8px);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,93,79,.0)}50%{box-shadow:0 0 0 6px rgba(255,93,79,.18)}}
+.rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+<style>
+.wrap{position:absolute;inset:0;padding:44px 48px 30px;display:flex;flex-direction:column;gap:26px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:28px}
+.top .h1{margin-top:12px}
+.top .sub{margin-top:12px}
+.money{color:var(--tomato);font-style:italic}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:118px;gap:14px;overflow:auto;scrollbar-width:none;padding:2px}
+.grid::-webkit-scrollbar{display:none}
+.tile{position:relative;display:flex;align-items:center;gap:16px;padding:16px 18px 16px 22px;border-radius:22px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.tile::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:5px;border-radius:0 6px 6px 0;background:var(--c)}
+.tile.urgent{background:linear-gradient(180deg,rgba(255,93,79,.16),rgba(255,93,79,.06));box-shadow:inset 0 0 0 1.5px rgba(255,93,79,.45);animation:glow 2.4s ease-in-out infinite}
+.emo{font-size:46px;width:66px;height:66px;flex:none;display:grid;place-items:center;border-radius:18px;background:rgba(255,246,236,.06)}
+.meta{min-width:0;flex:1}
+.name{font:800 22px/1.15 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q{margin-top:6px;font:600 16px/1 var(--sans);color:var(--dim)}
+.badge{position:absolute;bottom:12px;right:12px;padding:7px 11px;border-radius:999px;font:800 14px/1 var(--sans);color:#1b0f08;background:var(--c)}
+.foot{display:flex;align-items:center;justify-content:space-between}
+.legend{display:flex;gap:20px;font:700 16px var(--sans);color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+</style></head>
+<body>
+<div class="wait">Loading pantry <i></i><i></i><i></i></div>
+<main class="wrap" id="app" hidden>
+  <header class="top rise">
+    <div>
+      <div class="eyebrow">Pantry · sorted by urgency</div>
+      <h1 class="h1" id="headline"></h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button class="btn btn-primary" id="plan">Plan meals around these&nbsp;→</button>
+  </header>
+  <section class="grid" id="grid"></section>
+  <footer class="foot">
+    <div class="legend"><span><i class="dot bg-urgent"></i>Use today or tomorrow</span><span><i class="dot bg-soon"></i>Within 3 days</span><span><i class="dot bg-fresh"></i>Fresh</span></div>
+    <div class="voicehint">Try <b>“What should we cook tonight?”</b></div>
+  </footer>
+</main>
+<script>window.__SOUS_SAMPLE__={"content":[{"type":"text","text":"You have about $22.67 of food at risk."}],"structuredContent":{"ok":true,"tool":"pantry_check","speech":"You have about $22.67 of food at risk.","view":"pantry","data":{"totalValueUsd":52.95,"atRiskValueUsd":22.67,"items":[{"id":"p1","name":"Spinach","emoji":"🥬","qty":1,"unit":"bag","category":"produce","expiresInDays":1,"status":"urgent","valueUsd":3.49},{"id":"p2","name":"Cooked rice","emoji":"🍚","qty":3,"unit":"cups","category":"leftovers","expiresInDays":1,"status":"urgent","valueUsd":1.5},{"id":"p3","name":"Ripe bananas","emoji":"🍌","qty":4,"unit":"","category":"produce","expiresInDays":1,"status":"urgent","valueUsd":1.2},{"id":"p4","name":"Chicken thighs","emoji":"🍗","qty":1.5,"unit":"lb","category":"meat","expiresInDays":2,"status":"soon","valueUsd":6.99},{"id":"p5","name":"Greek yogurt","emoji":"🥣","qty":16,"unit":"oz","category":"dairy","expiresInDays":2,"status":"soon","valueUsd":4.29},{"id":"p6","name":"Tomatoes","emoji":"🍅","qty":4,"unit":"","category":"produce","expiresInDays":3,"status":"soon","valueUsd":2.8},{"id":"p7","name":"Red bell pepper","emoji":"🫑","qty":2,"unit":"","category":"produce","expiresInDays":3,"status":"soon","valueUsd":2.4},{"id":"p8","name":"Milk","emoji":"🥛","qty":0.5,"unit":"gal","category":"dairy","expiresInDays":4,"status":"fresh","valueUsd":2.1},{"id":"p9","name":"Tortillas","emoji":"🫓","qty":8,"unit":"","category":"bakery","expiresInDays":5,"status":"fresh","valueUsd":2.99},{"id":"p10","name":"Eggs","emoji":"🥚","qty":8,"unit":"","category":"dairy","expiresInDays":10,"status":"fresh","valueUsd":3.2},{"id":"p11","name":"Lemons","emoji":"🍋","qty":3,"unit":"","category":"produce","expiresInDays":12,"status":"fresh","valueUsd":1.8},{"id":"p12","name":"Cheddar","emoji":"🧀","qty":6,"unit":"oz","category":"dairy","expiresInDays":14,"status":"fresh","valueUsd":3.5},{"id":"p13","name":"Potatoes","emoji":"🥔","qty":2,"unit":"lb","category":"produce","expiresInDays":18,"status":"fresh","valueUsd":2.5},{"id":"p14","name":"Onions","emoji":"🧅","qty":3,"unit":"","category":"produce","expiresInDays":20,"status":"fresh","valueUsd":1.5},{"id":"p15","name":"Chickpeas","emoji":"🥫","qty":2,"unit":"cans","category":"pantry","expiresInDays":null,"status":"fresh","valueUsd":2},{"id":"p16","name":"Coconut milk","emoji":"🥥","qty":1,"unit":"can","category":"pantry","expiresInDays":null,"status":"fresh","valueUsd":2.29}],"expiringSoon":[]}}};</script>
+<script>
+/* Sous MCP App view runtime: the view side of the MCP Apps (SEP-1865) postMessage JSON-RPC bridge. */
+(function () {
+  var pending = new Map(), nextId = 2, initialized = false, renderer = null, last = null, got = false;
+  function post(m) { try { window.parent.postMessage(m, '*'); } catch (e) {} }
+  function showErr(e) {
+    var el = document.querySelector('.err') || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'err' }));
+    el.textContent = 'View error: ' + (e && e.message ? e.message : e);
+  }
+  function handle(result) {
+    got = true; last = result;
+    var w = document.querySelector('.wait'); if (w) w.remove();
+    if (renderer) { try { renderer(result); } catch (e) { console.error(e); showErr(e); } }
+  }
+  window.addEventListener('message', function (ev) {
+    var m = ev.data;
+    if (!m || typeof m !== 'object' || m.jsonrpc !== '2.0') return;
+    if (m.method === 'ui/notifications/tool-result') { handle(m.params); return; }
+    if (m.method) return; // tool-input, host-context-changed, etc.: nothing to do
+    if (m.id === 1 && !initialized) { initialized = true; post({ jsonrpc: '2.0', method: 'ui/notifications/initialized' }); return; }
+    var p = pending.get(m.id);
+    if (p) { pending.delete(m.id); m.error ? p.reject(m.error) : p.resolve(m.result); }
+  });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.Sous = {
+    onResult: function (fn) { renderer = fn; if (last) handle(last); },
+    callTool: function (name, args) {
+      var id = nextId++;
+      post({ jsonrpc: '2.0', id: id, method: 'tools/call', params: { name: name, arguments: args || {} } });
+      return new Promise(function (res, rej) {
+        pending.set(id, { resolve: res, reject: rej });
+        setTimeout(function () { if (pending.has(id)) { pending.delete(id); rej(new Error('Host did not answer')); } }, 30000);
+      });
+    },
+    /** Wire a button to a tool call with a loading state. */
+    bind: function (btn, name, args) {
+      btn.addEventListener('click', function () {
+        btn.classList.add('loading');
+        Sous.callTool(name, typeof args === 'function' ? args() : args)
+          .catch(function (e) { console.warn(e); })
+          .finally(function () { setTimeout(function () { btn.classList.remove('loading'); }, 400); });
+      });
+    },
+    sc: function (r) { return (r && r.structuredContent) || {}; },
+    data: function (r) { return ((r && r.structuredContent) || {}).data || {}; },
+    esc: esc,
+    money: function (n) { n = Number(n) || 0; return '$' + n.toFixed(2).replace(/\.00$/, '.00'); },
+    when: function (d) {
+      if (d == null) return 'No date';
+      if (d < 0) return 'Expired';
+      if (d === 0) return 'Today';
+      if (d === 1) return 'Tomorrow';
+      return d + ' days';
+    },
+    urgency: function (d) { return d == null ? 'fresh' : d < 0 ? 'expired' : d <= 1 ? 'urgent' : d <= 3 ? 'soon' : 'fresh'; },
+    qty: function (q, u) { if (q == null || q === '') return u || ''; var s = String(Math.round(q * 100) / 100); return u ? s + ' ' + u : s; }
+  };
+  post({ jsonrpc: '2.0', id: 1, method: 'ui/initialize', params: { appInfo: { name: 'sous-view', version: '1' }, appCapabilities: {}, protocolVersion: '2026-01-26' } });
+  // Opened directly (no host): render the embedded sample so the view can be previewed on its own.
+  window.addEventListener('load', function () {
+    setTimeout(function () { if (!got && window.parent === window && window.__SOUS_SAMPLE__) handle(window.__SOUS_SAMPLE__); }, 50);
+  });
+})();
+</script>
+<script>
+Sous.bind(document.getElementById('plan'), 'meal_suggest', {});
+Sous.onResult(function (r) {
+  var d = Sous.data(r), items = (d.items || []).slice();
+  var rank = function (i) { return i.expiresInDays == null ? 999 : i.expiresInDays; };
+  items.sort(function (a, b) { return rank(a) - rank(b) || (b.valueUsd || 0) - (a.valueUsd || 0); });
+  var risky = items.filter(function (i) { return i.expiresInDays != null && i.expiresInDays <= 3; });
+  var atRisk = d.atRiskValueUsd != null ? d.atRiskValueUsd : risky.reduce(function (s, i) { return s + (i.valueUsd || 0); }, 0);
+  document.getElementById('headline').innerHTML = '<span class="money">' + Sous.money(atRisk) + '</span> of food is at risk';
+  document.getElementById('sub').textContent = risky.length + ' item' + (risky.length === 1 ? '' : 's') + ' expire in the next 3 days' +
+    (d.totalValueUsd ? ' · pantry worth ' + Sous.money(d.totalValueUsd) : '') + '.';
+  var colors = { urgent: 'var(--urgent)', soon: 'var(--soon)', fresh: 'var(--fresh)', expired: 'var(--expired)' };
+  document.getElementById('grid').innerHTML = items.map(function (i, n) {
+    var st = i.status || Sous.urgency(i.expiresInDays);
+    return '<article class="tile rise ' + st + '" style="--c:' + colors[st] + ';animation-delay:' + Math.min(n * 35, 500) + 'ms">' +
+      '<div class="emo">' + Sous.esc(i.emoji || '🧺') + '</div>' +
+      '<div class="meta"><div class="name">' + Sous.esc(i.name) + '</div><div class="q">' + Sous.esc(Sous.qty(i.qty, i.unit)) + (i.valueUsd ? ' · ' + Sous.money(i.valueUsd) : '') + '</div></div>' +
+      '<span class="badge">' + Sous.esc(Sous.when(i.expiresInDays)) + '</span></article>';
+  }).join('');
+  document.getElementById('app').hidden = false;
+});
+</script>
+</body></html>

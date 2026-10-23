@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sous · The zero-waste kitchen agent for Alexa+</title>
+  <meta name="description" content="Sous plans dinner around what's about to expire, keeps allergies safe, orders what's missing, and cooks with you hands-free. A self-hosted MCP server for Alexa+.">
+  <meta name="theme-color" content="#0f0b08">
+  <meta property="og:title" content="Sous · The zero-waste kitchen agent for Alexa+">
+  <meta property="og:description" content="Plans dinner around what's about to expire, keeps allergies safe, orders what's missing, and cooks with you hands-free.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f0b08'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%232fd8ff' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23f5a524'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="landing/landing.css">
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <header class="nav" id="nav">
+    <a class="brand" href="#top" aria-label="Sous home"><span class="brand-ring" aria-hidden="true"></span>Sous</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#say-it">Say it</a>
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost sm" href="https://github.com/johnbosco-j/sous" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-primary sm" href="/device">Try the simulator</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <video class="hero-video" muted loop playsinline autoplay preload="metadata" aria-hidden="true">
+        <source src="landing/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero-fallback" aria-hidden="true"><span class="ring"></span></div>
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      <div class="hero-vignette" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <p class="eyebrow fade-up" style="--d:0ms"><span class="dot"></span>Alexa+ · MCP server · Amazon Bedrock</p>
+        <h1 class="hero-title" id="hero-title" aria-label="Sous.">
+          <span class="char" style="--i:0">S</span><span class="char" style="--i:1">o</span><span class="char" style="--i:2">u</span><span class="char" style="--i:3">s</span><span class="char dot-accent" style="--i:4">.</span>
+        </h1>
+        <p class="hero-tagline fade-up" style="--d:520ms">The zero-waste kitchen agent for <em>Alexa+</em>.</p>
+        <p class="hero-sub fade-up" style="--d:700ms">Plans dinner around what's about to expire, keeps allergies safe, orders what's missing, and cooks with you hands-free.</p>
+        <div class="hero-actions fade-up" style="--d:880ms">
+          <a class="btn btn-primary" href="/device">Open the Echo Show simulator
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+        <ul class="hero-badges fade-up" style="--d:1050ms" aria-label="Built on">
+          <li>MCP spec 2025-11-25</li>
+          <li>Streamable HTTP</li>
+          <li>MCP Apps cards</li>
+          <li>Amazon Bedrock</li>
+        </ul>
+      </div>
+
+      <div class="hero-say" aria-hidden="true">
+        <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        <span>
+          <span class="label">Alexa is listening</span><br>
+          <span class="utter" id="utter">Alexa, what should we cook tonight?</span>
+        </span>
+      </div>
+
+      <a class="scroll-cue" href="#problem" aria-label="Scroll to the problem"><i></i>Scroll</a>
+      <div class="lightbar" aria-hidden="true"></div>
+    </section>
+
+    <!-- expiring ticker -->
+    <div class="marquee" aria-label="Items about to expire in the demo household">
+      <div class="marquee-track">
+        <span>🥬 Baby spinach <b class="exp-1">expires tomorrow</b></span>
+        <span>🍚 Cooked rice <b class="exp-1">tomorrow</b></span>
+        <span>🍌 Ripe bananas <b class="exp-1">tomorrow</b></span>
+        <span>🍗 Chicken thighs <b class="exp-2">2 days</b></span>
+        <span>🥣 Greek yogurt <b class="exp-2">2 days</b></span>
+        <span>🍅 Tomatoes <b class="exp-3">3 days</b></span>
+        <span>🫑 Red bell pepper <b class="exp-3">3 days</b></span>
+        <span>🥛 Milk <b class="exp-3">4 days</b></span>
+        <span aria-hidden="true">🥬 Baby spinach <b class="exp-1">expires tomorrow</b></span>
+        <span aria-hidden="true">🍚 Cooked rice <b class="exp-1">tomorrow</b></span>
+        <span aria-hidden="true">🍌 Ripe bananas <b class="exp-1">tomorrow</b></span>
+        <span aria-hidden="true">🍗 Chicken thighs <b class="exp-2">2 days</b></span>
+        <span aria-hidden="true">🥣 Greek yogurt <b class="exp-2">2 days</b></span>
+        <span aria-hidden="true">🍅 Tomatoes <b class="exp-3">3 days</b></span>
+        <span aria-hidden="true">🫑 Red bell pepper <b class="exp-3">3 days</b></span>
+        <span aria-hidden="true">🥛 Milk <b class="exp-3">4 days</b></span>
+      </div>
+    </div>
+
+    <!-- ============ PROBLEM ============ -->
+    <section class="section problem" id="problem" aria-labelledby="problem-title">
+      <div class="decor" data-speed="0.18" aria-hidden="true">
+        <span class="blob tomato" style="width:420px;height:420px;left:-120px;top:12%"></span>
+        <span class="blob saffron" style="width:360px;height:360px;right:-80px;top:52%;opacity:.28"></span>
+      </div>
+      <div class="decor" data-speed="-0.12" aria-hidden="true">
+        <span class="float-chip" style="right:9%;top:16%;transform:rotate(-12deg)">🥬</span>
+        <span class="float-chip" style="right:22%;top:30%;font-size:44px;transform:rotate(14deg)">🍌</span>
+        <span class="float-chip" style="left:4%;bottom:12%;font-size:48px;transform:rotate(-8deg)">🍅</span>
+      </div>
+      <div class="wrap">
+        <p class="kicker" data-reveal>The problem</p>
+        <h2 class="display" id="problem-title" data-reveal style="--i:1">Good food dies quietly in the <em>crisper drawer.</em></h2>
+        <p class="lede" data-reveal style="--i:2">Nobody plans to waste the spinach. It just expires while everyone is busy deciding what's for dinner, and then it's takeout again.</p>
+
+        <div class="stats">
+          <article class="stat" data-reveal style="--i:0;--c:var(--tomato)">
+            <div class="num"><span data-count="40" data-prefix="30–" data-suffix="%">30–40%</span></div>
+            <p>of the US food supply is wasted.</p>
+            <a class="src" href="https://www.usda.gov/foodwaste" target="_blank" rel="noopener">Source: USDA</a>
+          </article>
+          <article class="stat" data-reveal style="--i:1;--c:var(--saffron)">
+            <div class="num"><span data-count="1500" data-prefix="$">$1,500</span></div>
+            <p>lost to uneaten food each year by the average American family of four.</p>
+            <a class="src" href="https://www.usda.gov/foodwaste" target="_blank" rel="noopener">Source: USDA</a>
+          </article>
+          <article class="stat" data-reveal style="--i:2;--c:var(--basil)">
+            <div class="num">1 in 3</div>
+            <p>pounds of US surplus food is generated at home: 23.5 million tons a year.</p>
+            <a class="src" href="https://refed.org/downloads/by-sector-residential-2025.pdf" target="_blank" rel="noopener">Source: ReFED, residential sector (2025)</a>
+          </article>
+          <article class="stat" data-reveal style="--i:3;--c:var(--cyan)">
+            <div class="num"><span data-count="141" data-prefix="$" data-suffix="B">$141B</span></div>
+            <p>spent by US households on food that never gets eaten, about 13% of grocery spending.</p>
+            <a class="src" href="https://refed.org/" target="_blank" rel="noopener">Source: ReFED (2024 data)</a>
+          </article>
+        </div>
+
+        <p class="punch" data-reveal>Sous turns <b>"what's expiring?"</b> into "what's for dinner?", out loud, in the one room where your hands are always full.</p>
+      </div>
+    </section>
+
+    <!-- ============ SAY IT ============ -->
+    <section class="section sayit" id="say-it" aria-labelledby="say-title">
+      <div class="decor" data-speed="0.1" aria-hidden="true">
+        <span class="blob cyan" style="width:460px;height:460px;right:-160px;top:10%;opacity:.16"></span>
+      </div>
+      <div class="wrap sayit-grid">
+        <div class="sayit-copy">
+          <p class="kicker" data-reveal>Say it</p>
+          <h2 class="display" id="say-title" data-reveal style="--i:1">Just talk. <em>Sous</em> does the rest.</h2>
+          <p class="lede" data-reveal style="--i:2">Every reply is a real MCP tool call. Safety decisions (allergies, purchases) are made by deterministic code, never by the model.</p>
+        </div>
+        <div>
+          <div class="chat" id="chat" aria-label="Sample Alexa+ conversation with Sous">
+            <div class="bubble you"><span class="who">You</span>"Alexa, what should we cook tonight?"</div>
+            <div class="bubble alexa"><span class="who">Alexa+ · Sous</span>Your spinach and cooked rice expire tomorrow. A spinach and chickpea coconut curry uses both and takes 30 minutes. <span class="guard">I skipped Peanut Noodles because Leo is allergic to peanuts.</span><br><span class="tool">meal_suggest</span></div>
+            <div class="bubble you"><span class="who">You</span>"Add what we're missing to the cart."</div>
+            <div class="bubble alexa"><span class="who">Alexa+ · Sous</span>Two items from Amazon Fresh, arriving tomorrow morning. Should I place the order?<br><span class="tool">shopping_cart_build</span></div>
+            <div class="bubble you"><span class="who">You</span>"Yes, place the order."</div>
+            <div class="bubble alexa"><span class="who">Alexa+ · Sous</span>Done. It's ordered, and nothing is ever bought without your yes.<br><span class="tool">shopping_checkout</span></div>
+            <div class="bubble you"><span class="who">You</span>"Okay, let's cook. Next step."</div>
+            <div class="bubble alexa"><span class="who">Alexa+ · Sous</span>Step 2: soften the onion and garlic for 4 minutes. Want a timer?<br><span class="tool">cook_step</span></div>
+            <div class="typing" aria-hidden="true"><i></i><i></i><i></i></div>
+          </div>
+          <p class="sample-note">Sample dialogue · synthetic demo household · simulated checkout</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section how" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <p class="kicker" data-reveal>How it works</p>
+        <h2 class="display" id="how-title" data-reveal style="--i:1">One voice request. <em>Real</em> MCP all the way down.</h2>
+        <p class="lede" data-reveal style="--i:2">Sous is a self-hosted MCP server. Alexa+ calls its typed tools over Streamable HTTP; every result carries a short spoken line plus an MCP App card for Echo Show.</p>
+
+        <figure class="diagram" data-reveal style="--i:3">
+          <!-- desktop diagram -->
+          <svg class="d-desktop" viewBox="0 0 1200 560" role="img" aria-labelledby="dg-title dg-desc">
+            <title id="dg-title">Sous architecture</title>
+            <desc id="dg-desc">You speak to Alexa+, which calls the Sous MCP server over Streamable HTTP using MCP spec 2025-11-25. Sous runs deterministic tools backed by household memory and Amazon Bedrock, then returns speech and an MCP App card that renders on Echo Show.</desc>
+            <defs>
+              <linearGradient id="scr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a1d13"/><stop offset="1" stop-color="#0e0a07"/></linearGradient>
+            </defs>
+
+            <!-- wires -->
+            <path class="dg-wire cy" d="M180 245 H240"/>
+            <path class="dg-wire cy" d="M420 245 H560"/>
+            <path class="dg-wire sf" d="M890 245 H990"/>
+            <path class="dg-wire" d="M635 430 V470"/>
+            <path class="dg-wire" d="M815 430 V470"/>
+            <path class="dg-wire sf" d="M330 320 V507 H560"/>
+            <text class="dg-label" x="490" y="230" text-anchor="middle">MCP 2025-11-25</text>
+            <text class="dg-mono" x="490" y="272" text-anchor="middle">tools/call</text>
+            <text class="dg-label" x="940" y="230" text-anchor="middle">ui:// card</text>
+            <text class="dg-mono" x="940" y="272" text-anchor="middle">+ speech</text>
+            <text class="dg-mono" x="345" y="495">routes speech (simulator)</text>
+
+            <!-- packets -->
+            <circle class="dg-packet" r="5" fill="#2fd8ff" color="#2fd8ff"><animateMotion dur="1.6s" repeatCount="indefinite" path="M180 245 H240"/></circle>
+            <circle class="dg-packet" r="5" fill="#2fd8ff" color="#2fd8ff"><animateMotion dur="2s" begin=".4s" repeatCount="indefinite" path="M420 245 H560"/></circle>
+            <circle class="dg-packet" r="5" fill="#f5a524" color="#f5a524"><animateMotion dur="1.8s" begin=".9s" repeatCount="indefinite" path="M890 245 H990"/></circle>
+            <circle class="dg-packet" r="4" fill="#f5a524" color="#f5a524"><animateMotion dur="2.6s" begin=".2s" repeatCount="indefinite" path="M330 320 V507 H560"/></circle>
+
+            <!-- You -->
+            <rect class="dg-node" x="20" y="170" width="160" height="150" rx="20"/>
+            <circle cx="100" cy="214" r="24" fill="rgba(245,165,36,.16)" stroke="rgba(245,165,36,.6)"/>
+            <path d="M96 202a4 4 0 0 1 8 0v12a4 4 0 0 1-8 0zM89 212a11 11 0 0 0 22 0M100 223v5" fill="none" stroke="#f5a524" stroke-width="2.4" stroke-linecap="round"/>
+            <text class="dg-title" x="100" y="268" text-anchor="middle">You</text>
+            <text class="dg-sub" x="100" y="294" text-anchor="middle">"What's for dinner?"</text>
+
+            <!-- Alexa+ -->
+            <rect class="dg-node alexa" x="240" y="170" width="180" height="150" rx="20"/>
+            <circle cx="330" cy="214" r="20" fill="none" stroke="#2fd8ff" stroke-width="6"/>
+            <text class="dg-title" x="330" y="268" text-anchor="middle">Alexa+</text>
+            <text class="dg-sub" x="330" y="294" text-anchor="middle">agent picks the tool</text>
+
+            <!-- Sous -->
+            <rect class="dg-node sous" x="560" y="60" width="330" height="370" rx="24"/>
+            <text class="dg-title" x="582" y="100">Sous MCP server</text>
+            <text class="dg-mono" x="582" y="124">POST /mcp · Streamable HTTP</text>
+            <g font-size="11.5">
+              <rect class="dg-chip" x="578" y="142" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="160" font-size="11.5">meal_suggest</text>
+              <rect class="dg-chip" x="729" y="142" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="160" font-size="11.5">pantry_check</text>
+              <rect class="dg-chip" x="578" y="178" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="196" font-size="11.5">pantry_update</text>
+              <rect class="dg-chip" x="729" y="178" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="196" font-size="11.5">chef_improvise</text>
+              <rect class="dg-chip" x="578" y="214" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="232" font-size="11.5">cook_start</text>
+              <rect class="dg-chip" x="729" y="214" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="232" font-size="11.5">cook_step</text>
+              <rect class="dg-chip" x="578" y="250" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="268" font-size="11.5">timer_set</text>
+              <rect class="dg-chip" x="729" y="250" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="268" font-size="11.5">meal_plan_set</text>
+              <rect class="dg-chip" x="578" y="286" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="304" font-size="11.5">shopping_cart_build</text>
+              <rect class="dg-chip" x="729" y="286" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="304" font-size="11.5">shopping_checkout</text>
+              <rect class="dg-chip" x="578" y="322" width="145" height="28" rx="7"/><text class="dg-mono" x="588" y="340" font-size="11.5">household_memory</text>
+              <rect class="dg-chip" x="729" y="322" width="145" height="28" rx="7"/><text class="dg-mono" x="739" y="340" font-size="11.5">impact_report</text>
+            </g>
+            <rect class="dg-chip-g" x="578" y="378" width="145" height="32" rx="8"/><text class="dg-chip-g-t" x="590" y="399">✓ allergy guard</text>
+            <rect class="dg-chip-g" x="729" y="378" width="145" height="32" rx="8"/><text class="dg-chip-g-t" x="741" y="399">✓ confirm-to-buy</text>
+
+            <!-- Echo Show -->
+            <rect class="dg-node" x="990" y="150" width="190" height="190" rx="20"/>
+            <rect x="1010" y="170" width="150" height="94" rx="9" fill="url(#scr)" stroke="rgba(247,239,228,.18)"/>
+            <rect x="1020" y="182" width="40" height="52" rx="6" fill="#ec4a2f" opacity=".85"/>
+            <rect x="1065" y="182" width="40" height="52" rx="6" fill="#f5a524" opacity=".85"/>
+            <rect x="1110" y="182" width="40" height="52" rx="6" fill="#5cbf73" opacity=".85"/>
+            <rect x="1020" y="242" width="92" height="7" rx="3.5" fill="rgba(247,239,228,.45)"/>
+            <rect x="1010" y="258" width="150" height="3" rx="1.5" fill="#2fd8ff"/>
+            <text class="dg-title" x="1085" y="300" text-anchor="middle">Echo Show</text>
+            <text class="dg-sub" x="1085" y="324" text-anchor="middle">MCP App card</text>
+
+            <!-- Bedrock -->
+            <rect class="dg-node aws" x="560" y="470" width="150" height="74" rx="16"/>
+            <text class="dg-title" x="635" y="500" text-anchor="middle" font-size="17">Amazon Bedrock</text>
+            <text class="dg-sub" x="635" y="524" text-anchor="middle" font-size="12.5">Converse · tool use</text>
+
+            <!-- Memory -->
+            <rect class="dg-node" x="740" y="470" width="150" height="74" rx="16"/>
+            <text class="dg-title" x="815" y="500" text-anchor="middle" font-size="17">Household memory</text>
+            <text class="dg-sub" x="815" y="524" text-anchor="middle" font-size="12.5">persists across sessions</text>
+          </svg>
+
+          <!-- mobile diagram -->
+          <svg class="d-mobile" viewBox="0 0 360 940" role="img" aria-label="Sous architecture: You, then Alexa+, then the Sous MCP server, then Amazon Bedrock and household memory, then an Echo Show card.">
+            <path class="dg-wire cy" d="M180 100 V140"/>
+            <path class="dg-wire cy" d="M180 230 V300"/>
+            <path class="dg-wire" d="M92 630 V660"/>
+            <path class="dg-wire" d="M268 630 V660"/>
+            <path class="dg-wire sf" d="M180 630 V770"/>
+            <text class="dg-label" x="192" y="262">MCP 2025-11-25</text>
+            <text class="dg-mono" x="192" y="282">tools/call</text>
+            <text class="dg-label" x="190" y="752">ui:// card + speech</text>
+            <circle class="dg-packet" r="4.5" fill="#2fd8ff" color="#2fd8ff"><animateMotion dur="1.8s" repeatCount="indefinite" path="M180 230 V300"/></circle>
+            <circle class="dg-packet" r="4.5" fill="#f5a524" color="#f5a524"><animateMotion dur="2s" begin=".5s" repeatCount="indefinite" path="M180 630 V770"/></circle>
+
+            <rect class="dg-node" x="90" y="10" width="180" height="90" rx="18"/>
+            <circle cx="128" cy="55" r="19" fill="rgba(245,165,36,.16)" stroke="rgba(245,165,36,.6)"/>
+            <path d="M125 46a3 3 0 0 1 6 0v9a3 3 0 0 1-6 0zM120 53a8 8 0 0 0 16 0M128 61v4" fill="none" stroke="#f5a524" stroke-width="2" stroke-linecap="round"/>
+            <text class="dg-title" x="158" y="52" font-size="21">You</text>
+            <text class="dg-sub" x="158" y="76" font-size="12">"What's for dinner?"</text>
+
+            <rect class="dg-node alexa" x="70" y="140" width="220" height="90" rx="18"/>
+            <circle cx="110" cy="185" r="17" fill="none" stroke="#2fd8ff" stroke-width="5"/>
+            <text class="dg-title" x="142" y="181" font-size="21">Alexa+</text>
+            <text class="dg-sub" x="142" y="205" font-size="12">agent picks the tool</text>
+
+            <rect class="dg-node sous" x="20" y="300" width="320" height="330" rx="22"/>
+            <text class="dg-title" x="38" y="336" font-size="21">Sous MCP server</text>
+            <text class="dg-mono" x="38" y="358" font-size="11">POST /mcp · Streamable HTTP</text>
+            <g>
+              <rect class="dg-chip" x="34" y="374" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="391" font-size="11">meal_suggest</text>
+              <rect class="dg-chip" x="184" y="374" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="391" font-size="11">pantry_check</text>
+              <rect class="dg-chip" x="34" y="408" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="425" font-size="11">pantry_update</text>
+              <rect class="dg-chip" x="184" y="408" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="425" font-size="11">chef_improvise</text>
+              <rect class="dg-chip" x="34" y="442" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="459" font-size="11">cook_start</text>
+              <rect class="dg-chip" x="184" y="442" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="459" font-size="11">cook_step</text>
+              <rect class="dg-chip" x="34" y="476" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="493" font-size="11">timer_set</text>
+              <rect class="dg-chip" x="184" y="476" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="493" font-size="11">meal_plan_set</text>
+              <rect class="dg-chip" x="34" y="510" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="527" font-size="11">shopping_cart_build</text>
+              <rect class="dg-chip" x="184" y="510" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="527" font-size="11">shopping_checkout</text>
+              <rect class="dg-chip" x="34" y="544" width="142" height="26" rx="7"/><text class="dg-mono" x="43" y="561" font-size="11">household_memory</text>
+              <rect class="dg-chip" x="184" y="544" width="142" height="26" rx="7"/><text class="dg-mono" x="193" y="561" font-size="11">impact_report</text>
+            </g>
+            <rect class="dg-chip-g" x="34" y="584" width="142" height="30" rx="8"/><text class="dg-chip-g-t" x="45" y="604" font-size="11.5">✓ allergy guard</text>
+            <rect class="dg-chip-g" x="184" y="584" width="142" height="30" rx="8"/><text class="dg-chip-g-t" x="195" y="604" font-size="11.5">✓ confirm-to-buy</text>
+
+            <rect class="dg-node aws" x="20" y="660" width="146" height="70" rx="14"/>
+            <text class="dg-title" x="93" y="690" text-anchor="middle" font-size="15">Amazon Bedrock</text>
+            <text class="dg-sub" x="93" y="712" text-anchor="middle" font-size="11">Converse · tool use</text>
+            <rect class="dg-node" x="194" y="660" width="146" height="70" rx="14"/>
+            <text class="dg-title" x="267" y="690" text-anchor="middle" font-size="15">Household memory</text>
+            <text class="dg-sub" x="267" y="712" text-anchor="middle" font-size="11">across sessions</text>
+
+            <rect class="dg-node" x="70" y="770" width="220" height="160" rx="18"/>
+            <rect x="92" y="788" width="176" height="92" rx="9" fill="#1a120c" stroke="rgba(247,239,228,.18)"/>
+            <rect x="102" y="800" width="48" height="52" rx="6" fill="#ec4a2f" opacity=".85"/>
+            <rect x="156" y="800" width="48" height="52" rx="6" fill="#f5a524" opacity=".85"/>
+            <rect x="210" y="800" width="48" height="52" rx="6" fill="#5cbf73" opacity=".85"/>
+            <rect x="92" y="874" width="176" height="3" rx="1.5" fill="#2fd8ff"/>
+            <text class="dg-title" x="180" y="912" text-anchor="middle" font-size="19">Echo Show · MCP App</text>
+          </svg>
+        </figure>
+
+        <ol class="steps">
+          <li data-reveal style="--i:0"><b>You speak.</b> "Alexa, what's for dinner?" from across the kitchen, hands covered in flour.</li>
+          <li data-reveal style="--i:1"><b>Alexa+ calls Sous over MCP.</b> Streamable HTTP, spec 2025-11-25, typed tools with annotations and output schemas.</li>
+          <li data-reveal style="--i:2"><b>Deterministic engines decide.</b> Expiry ranking, the allergy guard and the cart token. The model never decides what's safe.</li>
+          <li data-reveal style="--i:3"><b>Echo Show shows it.</b> An MCP App card renders the result while Alexa speaks one short, voice-safe line.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="section features" id="features" aria-labelledby="feat-title">
+      <div class="decor" data-speed="0.14" aria-hidden="true">
+        <span class="blob basil" style="width:420px;height:420px;left:-140px;top:30%;opacity:.18"></span>
+        <span class="blob tomato" style="width:300px;height:300px;right:-60px;top:4%;opacity:.2"></span>
+      </div>
+      <div class="wrap">
+        <p class="kicker" data-reveal>What Sous does</p>
+        <h2 class="display" id="feat-title" data-reveal style="--i:1">A sous-chef that <em>remembers,</em> plans and shops.</h2>
+
+        <div class="grid">
+          <article class="card" data-reveal style="--i:0;--c:var(--tomato)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></svg></div>
+            <h3>Use-it-up planner</h3>
+            <p>Ranks recipes by what expires first, so tonight's dinner rescues tomorrow's spinach.</p>
+            <code>meal_suggest</code>
+          </article>
+          <article class="card" data-reveal style="--i:1;--c:var(--basil)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3>Allergy guard</h3>
+            <p>A deterministic filter removes unsafe recipes, including AI-invented ones. Never left to the model.</p>
+            <code>excluded[]</code>
+          </article>
+          <article class="card" data-reveal style="--i:2;--c:var(--saffron)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H6"/></svg></div>
+            <h3>Confirm-before-buy</h3>
+            <p>Builds an Amazon Fresh cart (simulated) with a cart token. Nothing is ordered until you say yes.</p>
+            <code>shopping_checkout</code>
+          </article>
+          <article class="card" data-reveal style="--i:3;--c:var(--cyan)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div>
+            <h3>Hands-free cook mode</h3>
+            <p>Giant steps on Echo Show, "next" and "back" by voice, named timers that chime.</p>
+            <code>cook_step · timer_set</code>
+          </article>
+          <article class="card" data-reveal style="--i:0;--c:#e9c9a0">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg></div>
+            <h3>Household memory</h3>
+            <p>Allergies, dislikes and pantry state persist across sessions and across everyone in the family.</p>
+            <code>household_memory</code>
+          </article>
+          <article class="card" data-reveal style="--i:1;--c:var(--basil)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+            <h3>Impact tracker</h3>
+            <p>Dollars rescued, kilograms saved and CO2e avoided, week by week, with a yearly projection.</p>
+            <code>impact_report</code>
+          </article>
+          <article class="card" data-reveal style="--i:2;--c:var(--saffron)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></div>
+            <h3>Amazon Bedrock agent</h3>
+            <p>A Converse tool-use loop routes speech to MCP tools. <code style="padding:1px 5px">chef_improvise</code> invents a recipe from leftovers, then the allergy guard checks it.</p>
+            <code>Converse API</code>
+          </article>
+          <article class="card" data-reveal style="--i:3;--c:var(--cyan)">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+            <h3>Echo Show cards</h3>
+            <p>Every result ships an MCP App: carousels, cook steps, carts and impact charts render as tappable cards.</p>
+            <code>ui://sous/*.html</code>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="section cta" id="try" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta-card" data-reveal>
+          <div>
+            <p class="kicker">Live demo</p>
+            <h2 class="display" id="cta-title">Hear it. See it. <em>Cook it.</em></h2>
+            <p class="lede">The Echo Show simulator runs the real MCP server: speak or type, watch the tool calls stream in, and tap the cards.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="/device">Open the Echo Show simulator
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/johnbosco-j/sous" target="_blank" rel="noopener">Read the code</a>
+            </div>
+          </div>
+          <div class="device" id="device">
+            <div class="device-screen" id="device-screen">
+              <div class="poster" aria-hidden="true">
+                <div class="clock" id="poster-clock">6:42</div>
+                <div class="hint">Try: "Alexa, what should we cook tonight?"</div>
+              </div>
+              <iframe id="device-frame" title="Sous Echo Show simulator preview" tabindex="-1" loading="lazy" data-src="/device?embed=1"></iframe>
+            </div>
+            <a class="device-link" href="/device" aria-label="Open the Echo Show simulator"></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BUILT WITH ============ -->
+    <section class="built" aria-label="Built with">
+      <div class="wrap built-row">
+        <div>
+          <div class="label">Built with</div>
+          <div class="logos" style="margin-top:14px">
+            <span>Model Context Protocol<small>2025-11-25</small></span>
+            <span>MCP Apps<small>ui://</small></span>
+            <span>Amazon Bedrock<small>Converse</small></span>
+            <span>Node.js + TypeScript</span>
+          </div>
+        </div>
+        <div class="oss">
+          <span class="badge mit">MIT licensed</span>
+          <a class="badge" href="https://github.com/johnbosco-j/sous" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+            johnbosco-j/sous
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>
+        <a class="brand" href="#top"><span class="brand-ring" aria-hidden="true"></span>Sous</a>
+        <p>Built for the Build, Ship, Shape: Amazon Developer Hackathon (Alexa+ track). All household data is synthetic, and checkout is a simulation that places no real orders.</p>
+      </div>
+      <div>
+        <p><a href="/device">Echo Show simulator</a> · <a href="https://github.com/johnbosco-j/sous" target="_blank" rel="noopener">GitHub</a> · MIT License</p>
+        <p>© <span id="year">2026</span> John Bosco J</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="landing/hero3d.js"></script>
+  <script src="landing/landing.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous · Alexa+ Simulator</title>
+<meta name="description" content="Echo Show-style Alexa+ simulator for Sous, the zero-waste kitchen agent. Hosts MCP App views over the MCP Apps postMessage bridge.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316100d'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' font-family='Georgia' fill='%23f6a72a'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/device/device.css">
+</head>
+<body>
+<div class="room" aria-hidden="true"><i class="glow g1"></i><i class="glow g2"></i><i class="glow g3"></i></div>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="logo">S</span><span class="word">Sous</span><span class="sep">/</span><span class="crumb">Alexa+ simulator · Echo Show 15</span></a>
+  <div class="status">
+    <span class="badge engine" id="engineBadge" title="Which brain routed the last request">engine · …</span>
+    <span class="badge mcp" title="Sous MCP server transport">MCP · Streamable HTTP · 2025-11-25</span>
+    <button class="tbtn" id="muteBtn" aria-pressed="false" title="Toggle spoken replies">🔊 Voice on</button>
+    <button class="tbtn" id="traceBtn" aria-expanded="false" title="Show the MCP trace (T)">MCP trace <kbd>T</kbd></button>
+    <button class="tbtn" id="resetBtn" title="Reseed the demo household">↺ Reset demo</button>
+  </div>
+</header>
+
+<main class="scene">
+  <div class="device" id="device">
+    <div class="bezel">
+      <span class="camera" aria-hidden="true"></span>
+      <div class="screen" id="screen">
+        <div class="stage" id="stage">
+          <section class="idle" id="idle">
+            <div class="idle-bg" aria-hidden="true"></div>
+            <div class="idle-top"><span id="idleDate"></span><span class="idle-house" id="idleHouse">Sous</span></div>
+            <div class="clock" id="clock">--:--</div>
+            <div class="idle-cards">
+              <article class="icard risk" id="riskCard">
+                <div class="ic-eyebrow">Use it up</div>
+                <div class="ic-big" id="riskUsd">$—</div>
+                <div class="ic-text" id="riskText">of food expires in the next 3 days</div>
+              </article>
+              <article class="icard saved">
+                <div class="ic-eyebrow">Rescued with Sous</div>
+                <div class="ic-big" id="savedUsd">$—</div>
+                <div class="ic-text" id="savedText">this week</div>
+              </article>
+              <article class="icard try">
+                <div class="ic-eyebrow">Try saying</div>
+                <div class="ic-quote" id="tryText">“Alexa, what should we cook tonight?”</div>
+              </article>
+            </div>
+          </section>
+          <div class="apphost" id="appHost"></div>
+          <div class="timers" id="timers" aria-live="polite"></div>
+          <div class="caption" id="caption" aria-live="polite">
+            <div class="cap-you" id="capYou"></div>
+            <div class="cap-alexa" id="capAlexa"></div>
+          </div>
+          <div class="lightbar" id="lightbar" data-state="idle" aria-hidden="true"><i></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="shadow" aria-hidden="true"></div>
+  </div>
+
+  <section class="dock" aria-label="Talk to Alexa">
+    <div class="inputrow">
+      <button class="mic" id="micBtn" type="button" aria-label="Push to talk (or hold Space)" title="Click to talk, or hold Space">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M18.5 11.5a6.5 6.5 0 0 1-13 0M12 18v3" fill="none" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <form class="say" id="form" autocomplete="off">
+        <span class="wake">Alexa,</span>
+        <input id="text" name="text" placeholder="what should we cook tonight?" aria-label="What you would say to Alexa" autocomplete="off">
+        <button type="submit" class="send" aria-label="Send">↵</button>
+      </form>
+    </div>
+    <div class="chips" id="chips" role="list"></div>
+    <div class="hint" id="hint">Click the mic or hold <kbd>Space</kbd> to talk · tap the cards on screen like a real Echo Show</div>
+  </section>
+</main>
+
+<aside class="trace" id="trace" aria-hidden="true" aria-label="MCP trace">
+  <div class="tr-head">
+    <div><div class="tr-title">MCP trace</div><div class="tr-sub" id="trSub">POST /mcp · Streamable HTTP</div></div>
+    <button class="tbtn" id="traceClose" aria-label="Close trace">✕</button>
+  </div>
+  <div class="tr-list" id="trList"><p class="tr-empty">Talk to Alexa. Every MCP <code>tools/call</code> and every MCP Apps bridge message shows up here.</p></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module" src="/device/device.js"></script>
+</body>
+</html>

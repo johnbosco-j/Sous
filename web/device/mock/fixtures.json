@@ -1,0 +1,212 @@
+{
+  "state": {
+    "household": { "name": "The Rivera household", "members": [
+      { "name": "Maya", "allergies": [], "dislikes": [] },
+      { "name": "Sam", "allergies": [], "dislikes": [] },
+      { "name": "Leo", "age": 8, "allergies": ["peanuts"], "dislikes": [] },
+      { "name": "Ava", "age": 5, "allergies": [], "dislikes": ["mushrooms"] }
+    ], "notes": [] },
+    "timers": [],
+    "bedrock": false,
+    "impact": { "rescuedUsd": 15.61, "rescuedKg": 2.7, "co2eKg": 6.8, "mealsCooked": 4, "itemsRescued": [], "week": [], "projectionYearUsd": 1016 },
+    "atRisk": { "atRiskValueUsd": 22.67, "items": ["spinach", "cooked rice", "ripe bananas", "chicken thighs"] }
+  },
+  "routes": [
+    { "match": "expire|pantry|what do we have|going bad", "key": "pantry" },
+    { "match": "remember|doesn.t like|allergic", "key": "memory" },
+    { "match": "first one|let.s cook|cook this|start cooking|cook the", "key": "cook1" },
+    { "match": "\\bnext\\b|continue|done with that", "key": "@next" },
+    { "match": "\\bback\\b|previous", "key": "@back" },
+    { "match": "timer", "key": "timer" },
+    { "match": "cart|missing|shopping|buy", "key": "cart" },
+    { "match": "\\byes\\b|place the order|confirm|go ahead", "key": "order" },
+    { "match": "saved|impact|how much food|rescued", "key": "impact" },
+    { "match": "cook|dinner|eat|meal|tonight", "key": "meals" }
+  ],
+  "tools": {
+    "meal_suggest": "meals", "pantry_check": "pantry", "cook_start": "cook1", "cook_step": "@step",
+    "timer_set": "timer", "shopping_cart_build": "cart", "shopping_checkout": "order", "impact_report": "impact"
+  },
+  "cookSequence": ["cook1", "cook2", "cook3", "cookDone"],
+  "responses": {
+    "pantry": {
+      "speech": "You have about $22.67 of food at risk. Spinach, cooked rice and the bananas need using by tomorrow.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "pantry_check", "arguments": { "withinDays": 3 }, "ms": 12, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/pantry.html", "html": null, "toolResult": {
+        "content": [{ "type": "text", "text": "You have about $22.67 of food at risk." }],
+        "structuredContent": { "ok": true, "tool": "pantry_check", "speech": "You have about $22.67 of food at risk.", "view": "pantry", "data": {
+          "totalValueUsd": 52.95, "atRiskValueUsd": 22.67,
+          "items": [
+            { "id": "p1", "name": "Spinach", "emoji": "🥬", "qty": 1, "unit": "bag", "category": "produce", "expiresInDays": 1, "status": "urgent", "valueUsd": 3.49 },
+            { "id": "p2", "name": "Cooked rice", "emoji": "🍚", "qty": 3, "unit": "cups", "category": "leftovers", "expiresInDays": 1, "status": "urgent", "valueUsd": 1.5 },
+            { "id": "p3", "name": "Ripe bananas", "emoji": "🍌", "qty": 4, "unit": "", "category": "produce", "expiresInDays": 1, "status": "urgent", "valueUsd": 1.2 },
+            { "id": "p4", "name": "Chicken thighs", "emoji": "🍗", "qty": 1.5, "unit": "lb", "category": "meat", "expiresInDays": 2, "status": "soon", "valueUsd": 6.99 },
+            { "id": "p5", "name": "Greek yogurt", "emoji": "🥣", "qty": 16, "unit": "oz", "category": "dairy", "expiresInDays": 2, "status": "soon", "valueUsd": 4.29 },
+            { "id": "p6", "name": "Tomatoes", "emoji": "🍅", "qty": 4, "unit": "", "category": "produce", "expiresInDays": 3, "status": "soon", "valueUsd": 2.8 },
+            { "id": "p7", "name": "Red bell pepper", "emoji": "🫑", "qty": 2, "unit": "", "category": "produce", "expiresInDays": 3, "status": "soon", "valueUsd": 2.4 },
+            { "id": "p8", "name": "Milk", "emoji": "🥛", "qty": 0.5, "unit": "gal", "category": "dairy", "expiresInDays": 4, "status": "fresh", "valueUsd": 2.1 },
+            { "id": "p9", "name": "Tortillas", "emoji": "🫓", "qty": 8, "unit": "", "category": "bakery", "expiresInDays": 5, "status": "fresh", "valueUsd": 2.99 },
+            { "id": "p10", "name": "Eggs", "emoji": "🥚", "qty": 8, "unit": "", "category": "dairy", "expiresInDays": 10, "status": "fresh", "valueUsd": 3.2 },
+            { "id": "p11", "name": "Lemons", "emoji": "🍋", "qty": 3, "unit": "", "category": "produce", "expiresInDays": 12, "status": "fresh", "valueUsd": 1.8 },
+            { "id": "p12", "name": "Cheddar", "emoji": "🧀", "qty": 6, "unit": "oz", "category": "dairy", "expiresInDays": 14, "status": "fresh", "valueUsd": 3.5 },
+            { "id": "p13", "name": "Potatoes", "emoji": "🥔", "qty": 2, "unit": "lb", "category": "produce", "expiresInDays": 18, "status": "fresh", "valueUsd": 2.5 },
+            { "id": "p14", "name": "Onions", "emoji": "🧅", "qty": 3, "unit": "", "category": "produce", "expiresInDays": 20, "status": "fresh", "valueUsd": 1.5 },
+            { "id": "p15", "name": "Chickpeas", "emoji": "🥫", "qty": 2, "unit": "cans", "category": "pantry", "expiresInDays": null, "status": "fresh", "valueUsd": 2.0 },
+            { "id": "p16", "name": "Coconut milk", "emoji": "🥥", "qty": 1, "unit": "can", "category": "pantry", "expiresInDays": null, "status": "fresh", "valueUsd": 2.29 }
+          ],
+          "expiringSoon": []
+        } } } },
+      "timers": []
+    },
+    "meals": {
+      "speech": "Here are three use-it-up dinners. First, a spinach and chickpea coconut curry: it uses the spinach and rice before they spoil tomorrow. I skipped peanut noodles because Leo is allergic to peanuts.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "meal_suggest", "arguments": { "count": 4 }, "ms": 38, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/meals.html", "html": null, "toolResult": {
+        "content": [{ "type": "text", "text": "Here are three use-it-up dinners." }],
+        "structuredContent": { "ok": true, "tool": "meal_suggest", "speech": "Here are three use-it-up dinners.", "view": "meals", "data": {
+          "atRisk": [{ "name": "Spinach", "expiresInDays": 1 }, { "name": "Cooked rice", "expiresInDays": 1 }, { "name": "Ripe bananas", "expiresInDays": 1 }, { "name": "Chicken thighs", "expiresInDays": 2 }, { "name": "Greek yogurt", "expiresInDays": 2 }],
+          "excluded": [{ "title": "Peanut Noodles", "reason": "Leo is allergic to peanuts" }],
+          "suggestions": [
+            { "recipeId": "r_curry", "title": "Spinach & Chickpea Coconut Curry", "emoji": "🍛", "gradient": ["#f5a524", "#ef553b"], "minutes": 30, "servings": 4, "kidFriendly": true, "score": 14.5,
+              "uses": [{ "name": "Spinach", "expiresInDays": 1 }, { "name": "Cooked rice", "expiresInDays": 1 }, { "name": "Tomatoes", "expiresInDays": 3 }],
+              "missing": [], "reason": "Uses the spinach and rice before they spoil tomorrow.", "rescueValueUsd": 7.79 },
+            { "recipeId": "r_tzatziki", "title": "Tzatziki Chicken Bowls", "emoji": "🥙", "gradient": ["#22d3f5", "#3b5bdb"], "minutes": 35, "servings": 4, "kidFriendly": true, "score": 12.1,
+              "uses": [{ "name": "Chicken thighs", "expiresInDays": 2 }, { "name": "Greek yogurt", "expiresInDays": 2 }, { "name": "Spinach", "expiresInDays": 1 }],
+              "missing": [{ "name": "Cucumber", "qty": 1, "unit": "" }, { "name": "Pita bread", "qty": 1, "unit": "pack" }], "reason": "Rescues the chicken and yogurt, the two priciest items at risk.", "rescueValueUsd": 14.77 },
+            { "recipeId": "r_friedrice", "title": "Egg Fried Rice with Peppers", "emoji": "🍳", "gradient": ["#5cc97f", "#1f8a70"], "minutes": 15, "servings": 4, "kidFriendly": true, "score": 9.4,
+              "uses": [{ "name": "Cooked rice", "expiresInDays": 1 }, { "name": "Red bell pepper", "expiresInDays": 3 }],
+              "missing": [{ "name": "Frozen peas", "qty": 1, "unit": "bag" }], "reason": "Fifteen minutes, and it finishes the rice and peppers.", "rescueValueUsd": 3.9 },
+            { "recipeId": "r_pancakes", "title": "Banana Oat Pancakes", "emoji": "🥞", "gradient": ["#ffb547", "#b07cff"], "minutes": 20, "servings": 4, "kidFriendly": true, "score": 7.2,
+              "uses": [{ "name": "Ripe bananas", "expiresInDays": 1 }, { "name": "Milk", "expiresInDays": 4 }],
+              "missing": [], "reason": "Breakfast for dinner that saves the bananas.", "rescueValueUsd": 3.3 }
+          ]
+        } } } },
+      "timers": []
+    },
+    "memory": {
+      "speech": "Got it. I'll remember Ava doesn't like mushrooms and keep them off the plan.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "household_memory", "arguments": { "action": "remember", "member": "Ava", "dislike": "mushrooms" }, "ms": 9, "ok": true }],
+      "ui": null, "timers": []
+    },
+    "cook1": {
+      "speech": "Let's make the spinach and chickpea coconut curry. Step 1: warm two tablespoons of oil in a large pan, add the onion, and cook until soft.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "cook_start", "arguments": { "recipeId": "r_curry" }, "ms": 14, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cook.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Step 1." }], "structuredContent": { "ok": true, "tool": "cook_start", "speech": "Step 1.", "view": "cook", "data": {
+        "recipeId": "r_curry", "title": "Spinach & Chickpea Coconut Curry", "emoji": "🍛", "gradient": ["#f5a524", "#ef553b"], "stepIndex": 0, "totalSteps": 5,
+        "step": { "text": "Warm 2 tablespoons of oil in a large pan. Add the diced onion and cook until soft and golden.", "timerSeconds": 300, "tip": "Medium heat. You want soft and sweet, not brown." },
+        "ingredients": [
+          { "name": "Spinach", "qty": 1, "unit": "bag", "have": true }, { "name": "Cooked rice", "qty": 3, "unit": "cups", "have": true },
+          { "name": "Chickpeas", "qty": 1, "unit": "can", "have": true }, { "name": "Coconut milk", "qty": 1, "unit": "can", "have": true },
+          { "name": "Tomatoes", "qty": 2, "unit": "", "have": true }, { "name": "Onion", "qty": 1, "unit": "", "have": true },
+          { "name": "Garlic", "qty": 2, "unit": "cloves", "have": true }, { "name": "Curry powder", "qty": 2, "unit": "tbsp", "have": true }
+        ], "done": false } } } },
+      "timers": []
+    },
+    "cook2": {
+      "speech": "Step 2: stir in the garlic and curry powder for 30 seconds, then add the chopped tomatoes.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "cook_step", "arguments": { "action": "next" }, "ms": 6, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cook.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Step 2." }], "structuredContent": { "ok": true, "tool": "cook_step", "speech": "Step 2.", "view": "cook", "data": {
+        "recipeId": "r_curry", "title": "Spinach & Chickpea Coconut Curry", "emoji": "🍛", "gradient": ["#f5a524", "#ef553b"], "stepIndex": 1, "totalSteps": 5,
+        "step": { "text": "Stir in the garlic and curry powder for 30 seconds, then add the chopped tomatoes.", "tip": "If the spices start to catch, add a splash of water." },
+        "ingredients": [
+          { "name": "Spinach", "qty": 1, "unit": "bag", "have": true }, { "name": "Cooked rice", "qty": 3, "unit": "cups", "have": true },
+          { "name": "Chickpeas", "qty": 1, "unit": "can", "have": true }, { "name": "Coconut milk", "qty": 1, "unit": "can", "have": true },
+          { "name": "Tomatoes", "qty": 2, "unit": "", "have": true }, { "name": "Onion", "qty": 1, "unit": "", "have": true },
+          { "name": "Garlic", "qty": 2, "unit": "cloves", "have": true }, { "name": "Curry powder", "qty": 2, "unit": "tbsp", "have": true }
+        ], "done": false } } } },
+      "timers": []
+    },
+    "cook3": {
+      "speech": "Step 3: pour in the coconut milk and chickpeas, then simmer for 10 minutes. Want me to start a 10 minute timer?",
+      "engine": "rules",
+      "toolCalls": [{ "name": "cook_step", "arguments": { "action": "next" }, "ms": 5, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cook.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Step 3." }], "structuredContent": { "ok": true, "tool": "cook_step", "speech": "Step 3.", "view": "cook", "data": {
+        "recipeId": "r_curry", "title": "Spinach & Chickpea Coconut Curry", "emoji": "🍛", "gradient": ["#f5a524", "#ef553b"], "stepIndex": 2, "totalSteps": 5,
+        "step": { "text": "Pour in the coconut milk and chickpeas. Bring to a gentle simmer and cook for 10 minutes.", "timerSeconds": 600, "tip": "Lid half on. Stir every few minutes." },
+        "ingredients": [
+          { "name": "Spinach", "qty": 1, "unit": "bag", "have": true }, { "name": "Cooked rice", "qty": 3, "unit": "cups", "have": true },
+          { "name": "Chickpeas", "qty": 1, "unit": "can", "have": true }, { "name": "Coconut milk", "qty": 1, "unit": "can", "have": true },
+          { "name": "Tomatoes", "qty": 2, "unit": "", "have": true }, { "name": "Onion", "qty": 1, "unit": "", "have": true },
+          { "name": "Garlic", "qty": 2, "unit": "cloves", "have": true }, { "name": "Curry powder", "qty": 2, "unit": "tbsp", "have": true }
+        ], "done": false } } } },
+      "timers": []
+    },
+    "cookDone": {
+      "speech": "Dinner's ready! That curry rescued $7.79 of food that was about to go to waste.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "cook_step", "arguments": { "action": "next" }, "ms": 11, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cook.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Dinner's ready!" }], "structuredContent": { "ok": true, "tool": "cook_step", "speech": "Dinner's ready!", "view": "cook", "data": {
+        "recipeId": "r_curry", "title": "Spinach & Chickpea Coconut Curry", "emoji": "🍛", "gradient": ["#f5a524", "#ef553b"], "stepIndex": 4, "totalSteps": 5,
+        "step": { "text": "Fold in the spinach until it wilts, then serve over the warmed rice." },
+        "ingredients": [], "done": true,
+        "rescued": [{ "name": "Spinach", "valueUsd": 3.49 }, { "name": "Cooked rice", "valueUsd": 1.5 }, { "name": "Tomatoes", "valueUsd": 2.8 }]
+      } } } },
+      "timers": []
+    },
+    "timer": {
+      "speech": "Ten minute timer for the curry simmer, starting now.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "timer_set", "arguments": { "label": "Curry simmer", "seconds": 600 }, "ms": 4, "ok": true }],
+      "ui": null,
+      "timers": [{ "id": "t1", "label": "Curry simmer", "secondsFromNow": 600, "seconds": 600 }]
+    },
+    "cart": {
+      "speech": "I added the 4 items the plan is missing to your Amazon Fresh cart. The total is $12.65 with delivery today between 5 and 7. Should I place the order?",
+      "engine": "rules",
+      "toolCalls": [{ "name": "shopping_cart_build", "arguments": { "recipeIds": ["r_tzatziki", "r_friedrice"] }, "ms": 22, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cart.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Cart ready." }], "structuredContent": { "ok": true, "tool": "shopping_cart_build", "speech": "Cart ready.", "view": "cart",
+        "followUp": { "prompt": "Should I place the order?", "tool": "shopping_checkout", "arguments": { "cartToken": "ct_8f2a1c", "confirmed": true } },
+        "data": {
+          "cartToken": "ct_8f2a1c", "status": "draft", "store": "Amazon Fresh (simulated)", "deliveryWindow": "Today, 5–7 PM",
+          "lines": [
+            { "sku": "AF-CUC-01", "name": "Cucumber", "emoji": "🥒", "qty": 1, "unit": "", "priceUsd": 0.89, "forRecipes": ["Tzatziki Chicken Bowls"] },
+            { "sku": "AF-PIT-06", "name": "Pita bread", "emoji": "🫓", "qty": 1, "unit": "pack", "priceUsd": 3.29, "forRecipes": ["Tzatziki Chicken Bowls"] },
+            { "sku": "AF-PEA-12", "name": "Frozen peas", "emoji": "🫛", "qty": 1, "unit": "bag", "priceUsd": 2.49, "forRecipes": ["Egg Fried Rice with Peppers"] },
+            { "sku": "AF-DIL-02", "name": "Fresh dill", "emoji": "🌿", "qty": 1, "unit": "bunch", "priceUsd": 1.99, "forRecipes": ["Tzatziki Chicken Bowls"] }
+          ],
+          "subtotalUsd": 8.66, "deliveryFeeUsd": 3.99, "totalUsd": 12.65
+        } } } },
+      "timers": []
+    },
+    "order": {
+      "speech": "Done. Order SOUS-48213 is placed and arrives today between 5 and 7 PM.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "shopping_checkout", "arguments": { "cartToken": "ct_8f2a1c", "confirmed": true }, "ms": 31, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/cart.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Order placed." }], "structuredContent": { "ok": true, "tool": "shopping_checkout", "speech": "Order placed.", "view": "cart", "data": {
+          "cartToken": "ct_8f2a1c", "status": "placed", "orderId": "SOUS-48213", "eta": "Today, 5–7 PM", "store": "Amazon Fresh (simulated)", "deliveryWindow": "Today, 5–7 PM",
+          "lines": [
+            { "sku": "AF-CUC-01", "name": "Cucumber", "emoji": "🥒", "qty": 1, "unit": "", "priceUsd": 0.89, "forRecipes": ["Tzatziki Chicken Bowls"] },
+            { "sku": "AF-PIT-06", "name": "Pita bread", "emoji": "🫓", "qty": 1, "unit": "pack", "priceUsd": 3.29, "forRecipes": ["Tzatziki Chicken Bowls"] },
+            { "sku": "AF-PEA-12", "name": "Frozen peas", "emoji": "🫛", "qty": 1, "unit": "bag", "priceUsd": 2.49, "forRecipes": ["Egg Fried Rice with Peppers"] },
+            { "sku": "AF-DIL-02", "name": "Fresh dill", "emoji": "🌿", "qty": 1, "unit": "bunch", "priceUsd": 1.99, "forRecipes": ["Tzatziki Chicken Bowls"] }
+          ],
+          "subtotalUsd": 8.66, "deliveryFeeUsd": 3.99, "totalUsd": 12.65
+        } } } },
+      "timers": []
+    },
+    "impact": {
+      "speech": "This week Sous helped you rescue $23.40 of food, about 4.1 kilos. At this pace that's over $1,200 a year.",
+      "engine": "rules",
+      "toolCalls": [{ "name": "impact_report", "arguments": {}, "ms": 7, "ok": true }],
+      "ui": { "resourceUri": "ui://sous/impact.html", "html": null, "toolResult": { "content": [{ "type": "text", "text": "Impact." }], "structuredContent": { "ok": true, "tool": "impact_report", "speech": "Impact.", "view": "impact", "data": {
+          "rescuedUsd": 23.4, "rescuedKg": 4.1, "co2eKg": 10.2, "mealsCooked": 5, "projectionYearUsd": 1216,
+          "itemsRescued": [
+            { "name": "Spinach", "valueUsd": 3.49, "date": "2026-10-23" }, { "name": "Tomatoes", "valueUsd": 2.8, "date": "2026-10-23" },
+            { "name": "Cooked rice", "valueUsd": 1.5, "date": "2026-10-23" }, { "name": "Chicken thighs", "valueUsd": 6.99, "date": "2026-10-21" },
+            { "name": "Ripe bananas", "valueUsd": 1.2, "date": "2026-10-20" }
+          ],
+          "week": [{ "day": "Sat", "usd": 2.1 }, { "day": "Sun", "usd": 0 }, { "day": "Mon", "usd": 4.5 }, { "day": "Tue", "usd": 3.2 }, { "day": "Wed", "usd": 0 }, { "day": "Thu", "usd": 5.81 }, { "day": "Fri", "usd": 7.79 }]
+        } } } },
+      "timers": []
+    },
+    "fallback": {
+      "speech": "I can plan meals around what's expiring, cook with you step by step, and order what's missing. Try asking what to cook tonight.",
+      "engine": "rules", "toolCalls": [], "ui": null, "timers": []
+    }
+  }
+}

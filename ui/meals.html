@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sous · Meal ideas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16100d;--bg2:#1f1712;--card:#2a1f19;--card2:#33261e;--line:rgba(255,236,214,.10);--line2:rgba(255,236,214,.18);
+  --text:#fff6ec;--muted:#cdb9a8;--dim:#93806f;
+  --saffron:#f6a72a;--tomato:#ef563c;--basil:#5fca81;--cyan:#27d4f7;--plum:#b07cff;
+  --urgent:#ff5d4f;--soon:#ffb547;--fresh:#62d48f;--expired:#8a7a70;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
+             radial-gradient(800px 480px at -8% 112%,rgba(239,86,60,.15),transparent 60%),var(--bg)}
+button{font-family:inherit}
+.eyebrow{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--saffron)}
+.h1{font-family:var(--serif);font-weight:600;font-size:54px;line-height:1.02;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+.h1 em{font-style:italic;color:var(--saffron)}
+.sub{font-size:21px;color:var(--muted);line-height:1.35}
+.btn{appearance:none;border:0;border-radius:999px;padding:17px 28px;font:800 21px/1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+  transition:transform .15s ease,filter .15s ease,background .2s ease,opacity .2s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--saffron),var(--tomato));color:#1d0f07;box-shadow:0 12px 30px -12px rgba(239,86,60,.8)}
+.btn-ghost{background:rgba(255,246,236,.07);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn-sm{padding:13px 20px;font-size:18px}
+.btn.loading{opacity:.6;pointer-events:none}
+.btn.loading::after{content:"";width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;font:700 16px/1 var(--sans);background:rgba(255,246,236,.07);box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.u-urgent{color:var(--urgent)}.u-soon{color:var(--soon)}.u-fresh{color:var(--fresh)}.u-expired{color:var(--expired)}
+.bg-urgent{background:var(--urgent)}.bg-soon{background:var(--soon)}.bg-fresh{background:var(--fresh)}.bg-expired{background:var(--expired)}
+.voicehint{font:600 17px/1 var(--sans);color:var(--dim)}
+.voicehint b{color:var(--cyan);font-weight:800}
+.wait{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim);font:600 20px var(--sans)}
+.wait i{display:inline-block;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--saffron);animation:bob 1s ease-in-out infinite}
+.wait i:nth-child(2){animation-delay:.15s}.wait i:nth-child(3){animation-delay:.3s}
+.err{position:fixed;left:24px;right:24px;bottom:24px;padding:14px 18px;border-radius:14px;background:rgba(239,86,60,.16);color:#ffd0c6;font:600 16px var(--sans);box-shadow:inset 0 0 0 1px rgba(239,86,60,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-8px);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,93,79,.0)}50%{box-shadow:0 0 0 6px rgba(255,93,79,.18)}}
+.rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+<style>
+.wrap{position:absolute;inset:0;padding:38px 0 26px;display:flex;flex-direction:column;gap:20px}
+.top{padding:0 48px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.top .h1{margin-top:12px;font-size:50px}
+.atrisk{padding:0 48px;display:flex;gap:10px;flex-wrap:nowrap;overflow:hidden}
+.arrows{display:flex;gap:10px}
+.arrow{width:58px;height:58px;border-radius:50%;border:0;background:rgba(255,246,236,.08);box-shadow:inset 0 0 0 1.5px var(--line2);color:var(--text);font-size:26px;cursor:pointer}
+.arrow:disabled{opacity:.3}
+.rail{flex:1;min-height:0;display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 48px;padding:4px 48px 6px;scrollbar-width:none;scroll-behavior:smooth}
+.rail::-webkit-scrollbar{display:none}
+.card{scroll-snap-align:start;flex:0 0 374px;display:flex;flex-direction:column;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:inset 0 0 0 1px var(--line),0 24px 50px -30px rgba(0,0,0,.8)}
+.card.first{box-shadow:inset 0 0 0 2px rgba(246,167,42,.65),0 24px 60px -24px rgba(246,167,42,.35)}
+.band{position:relative;height:138px;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,var(--g1),var(--g2))}
+.band::after{content:"";position:absolute;inset:0;background:radial-gradient(120px 80px at 50% 60%,rgba(255,255,255,.28),transparent 70%)}
+.band .emoji{position:relative;z-index:1;font-size:82px;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35));animation:pop .6s cubic-bezier(.2,.9,.3,1.3) both}
+.idx{position:absolute;left:16px;top:16px;z-index:1;width:42px;height:42px;border-radius:50%;background:rgba(20,12,8,.72);color:#fff;display:grid;place-items:center;font:800 21px var(--sans)}
+.pills{position:absolute;right:14px;top:14px;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pill{padding:7px 11px;border-radius:999px;background:rgba(20,12,8,.62);color:#fff;font:800 14px/1 var(--sans);backdrop-filter:blur(6px)}
+.body{padding:18px 22px 20px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+.title{font-family:var(--serif);font-weight:600;font-size:29px;line-height:1.06;letter-spacing:-.01em}
+.reason{font:600 17px/1.35 var(--sans);color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.uses{display:flex;flex-wrap:wrap;gap:7px}
+.uses .chip{font-size:14px;padding:7px 11px}
+.uses{flex-wrap:nowrap;overflow:hidden}
+.need{font:700 16px/1.3 var(--sans);color:var(--soon)}
+.need.ok{color:var(--fresh)}
+.cfoot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rescue{font:800 15px/1.2 var(--sans);color:var(--saffron)}
+.rescue b{display:block;font-family:var(--serif);font-size:27px;color:var(--text)}
+.acts{display:flex;gap:8px}
+.acts .btn{padding:13px 17px;font-size:17px}
+.ai{display:inline-flex;align-items:center;gap:8px;font:800 14px var(--sans);color:var(--cyan)}
+.steps{font:600 15px/1.4 var(--sans);color:var(--muted);padding-left:20px}
+.guard{margin:0 48px;display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:18px;background:rgba(95,202,129,.10);box-shadow:inset 0 0 0 1px rgba(95,202,129,.35);font:700 18px/1.3 var(--sans)}
+.guard .shield{font-size:24px}
+.guard b{color:var(--basil)}
+.guard[hidden]{display:none}
+</style></head>
+<body>
+<div class="wait">Finding use-it-up meals <i></i><i></i><i></i></div>
+<main class="wrap" id="app" hidden>
+  <header class="top rise">
+    <div>
+      <div class="eyebrow" id="eyebrow">Use-it-up picks · tonight</div>
+      <h1 class="h1" id="headline"></h1>
+    </div>
+    <div class="arrows"><button class="arrow" id="prev" aria-label="Previous">‹</button><button class="arrow" id="next" aria-label="Next">›</button></div>
+  </header>
+  <div class="atrisk rise" id="atrisk"></div>
+  <section class="rail" id="rail"></section>
+  <div class="guard rise" id="guard" hidden><span class="shield">🛡️</span><span id="guardText"></span></div>
+</main>
+<script>window.__SOUS_SAMPLE__={"content":[{"type":"text","text":"Here are three use-it-up dinners."}],"structuredContent":{"ok":true,"tool":"meal_suggest","speech":"Here are three use-it-up dinners.","view":"meals","data":{"atRisk":[{"name":"Spinach","expiresInDays":1},{"name":"Cooked rice","expiresInDays":1},{"name":"Ripe bananas","expiresInDays":1},{"name":"Chicken thighs","expiresInDays":2},{"name":"Greek yogurt","expiresInDays":2}],"excluded":[{"title":"Peanut Noodles","reason":"Leo is allergic to peanuts"}],"suggestions":[{"recipeId":"r_curry","title":"Spinach & Chickpea Coconut Curry","emoji":"🍛","gradient":["#f5a524","#ef553b"],"minutes":30,"servings":4,"kidFriendly":true,"score":14.5,"uses":[{"name":"Spinach","expiresInDays":1},{"name":"Cooked rice","expiresInDays":1},{"name":"Tomatoes","expiresInDays":3}],"missing":[],"reason":"Uses the spinach and rice before they spoil tomorrow.","rescueValueUsd":7.79},{"recipeId":"r_tzatziki","title":"Tzatziki Chicken Bowls","emoji":"🥙","gradient":["#22d3f5","#3b5bdb"],"minutes":35,"servings":4,"kidFriendly":true,"score":12.1,"uses":[{"name":"Chicken thighs","expiresInDays":2},{"name":"Greek yogurt","expiresInDays":2},{"name":"Spinach","expiresInDays":1}],"missing":[{"name":"Cucumber","qty":1,"unit":""},{"name":"Pita bread","qty":1,"unit":"pack"}],"reason":"Rescues the chicken and yogurt, the two priciest items at risk.","rescueValueUsd":14.77},{"recipeId":"r_friedrice","title":"Egg Fried Rice with Peppers","emoji":"🍳","gradient":["#5cc97f","#1f8a70"],"minutes":15,"servings":4,"kidFriendly":true,"score":9.4,"uses":[{"name":"Cooked rice","expiresInDays":1},{"name":"Red bell pepper","expiresInDays":3}],"missing":[{"name":"Frozen peas","qty":1,"unit":"bag"}],"reason":"Fifteen minutes, and it finishes the rice and peppers.","rescueValueUsd":3.9},{"recipeId":"r_pancakes","title":"Banana Oat Pancakes","emoji":"🥞","gradient":["#ffb547","#b07cff"],"minutes":20,"servings":4,"kidFriendly":true,"score":7.2,"uses":[{"name":"Ripe bananas","expiresInDays":1},{"name":"Milk","expiresInDays":4}],"missing":[],"reason":"Breakfast for dinner that saves the bananas.","rescueValueUsd":3.3}]}}};</script>
+<script>
+/* Sous MCP App view runtime: the view side of the MCP Apps (SEP-1865) postMessage JSON-RPC bridge. */
+(function () {
+  var pending = new Map(), nextId = 2, initialized = false, renderer = null, last = null, got = false;
+  function post(m) { try { window.parent.postMessage(m, '*'); } catch (e) {} }
+  function showErr(e) {
+    var el = document.querySelector('.err') || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'err' }));
+    el.textContent = 'View error: ' + (e && e.message ? e.message : e);
+  }
+  function handle(result) {
+    got = true; last = result;
+    var w = document.querySelector('.wait'); if (w) w.remove();
+    if (renderer) { try { renderer(result); } catch (e) { console.error(e); showErr(e); } }
+  }
+  window.addEventListener('message', function (ev) {
+    var m = ev.data;
+    if (!m || typeof m !== 'object' || m.jsonrpc !== '2.0') return;
+    if (m.method === 'ui/notifications/tool-result') { handle(m.params); return; }
+    if (m.method) return; // tool-input, host-context-changed, etc.: nothing to do
+    if (m.id === 1 && !initialized) { initialized = true; post({ jsonrpc: '2.0', method: 'ui/notifications/initialized' }); return; }
+    var p = pending.get(m.id);
+    if (p) { pending.delete(m.id); m.error ? p.reject(m.error) : p.resolve(m.result); }
+  });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.Sous = {
+    onResult: function (fn) { renderer = fn; if (last) handle(last); },
+    callTool: function (name, args) {
+      var id = nextId++;
+      post({ jsonrpc: '2.0', id: id, method: 'tools/call', params: { name: name, arguments: args || {} } });
+      return new Promise(function (res, rej) {
+        pending.set(id, { resolve: res, reject: rej });
+        setTimeout(function () { if (pending.has(id)) { pending.delete(id); rej(new Error('Host did not answer')); } }, 30000);
+      });
+    },
+    /** Wire a button to a tool call with a loading state. */
+    bind: function (btn, name, args) {
+      btn.addEventListener('click', function () {
+        btn.classList.add('loading');
+        Sous.callTool(name, typeof args === 'function' ? args() : args)
+          .catch(function (e) { console.warn(e); })
+          .finally(function () { setTimeout(function () { btn.classList.remove('loading'); }, 400); });
+      });
+    },
+    sc: function (r) { return (r && r.structuredContent) || {}; },
+    data: function (r) { return ((r && r.structuredContent) || {}).data || {}; },
+    esc: esc,
+    money: function (n) { n = Number(n) || 0; return '$' + n.toFixed(2).replace(/\.00$/, '.00'); },
+    when: function (d) {
+      if (d == null) return 'No date';
+      if (d < 0) return 'Expired';
+      if (d === 0) return 'Today';
+      if (d === 1) return 'Tomorrow';
+      return d + ' days';
+    },
+    urgency: function (d) { return d == null ? 'fresh' : d < 0 ? 'expired' : d <= 1 ? 'urgent' : d <= 3 ? 'soon' : 'fresh'; },
+    qty: function (q, u) { if (q == null || q === '') return u || ''; var s = String(Math.round(q * 100) / 100); return u ? s + ' ' + u : s; }
+  };
+  post({ jsonrpc: '2.0', id: 1, method: 'ui/initialize', params: { appInfo: { name: 'sous-view', version: '1' }, appCapabilities: {}, protocolVersion: '2026-01-26' } });
+  // Opened directly (no host): render the embedded sample so the view can be previewed on its own.
+  window.addEventListener('load', function () {
+    setTimeout(function () { if (!got && window.parent === window && window.__SOUS_SAMPLE__) handle(window.__SOUS_SAMPLE__); }, 50);
+  });
+})();
+</script>
+<script>
+var rail = document.getElementById('rail');
+document.getElementById('prev').onclick = function () { rail.scrollBy({ left: -396, behavior: 'smooth' }); };
+document.getElementById('next').onclick = function () { rail.scrollBy({ left: 396, behavior: 'smooth' }); };
+function syncArrows() {
+  document.getElementById('prev').disabled = rail.scrollLeft < 8;
+  document.getElementById('next').disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 8;
+}
+rail.addEventListener('scroll', syncArrows);
+var colors = { urgent: 'var(--urgent)', soon: 'var(--soon)', fresh: 'var(--fresh)', expired: 'var(--expired)' };
+Sous.onResult(function (r) {
+  var sc = Sous.sc(r), d = Sous.data(r), list = d.suggestions || [];
+  var improvised = sc.tool === 'chef_improvise' || list.some(function (s) { return s.steps; });
+  var total = list.slice(0, 3).reduce(function (s, x) { return s + (x.rescueValueUsd || 0); }, 0);
+  document.getElementById('eyebrow').textContent = improvised ? "Chef's improvisation · from your pantry" : 'Use-it-up picks · tonight';
+  document.getElementById('headline').innerHTML = improvised
+    ? 'Something new from <em>what you have</em>'
+    : (list.length > 1 ? Math.min(list.length, 3) + ' dinners that rescue <em>' + Sous.money(total) + '</em>' : 'Tonight: <em>' + Sous.esc((list[0] || {}).title || 'no match') + '</em>');
+  document.getElementById('atrisk').innerHTML = (d.atRisk || []).slice(0, 6).map(function (a) {
+    var u = Sous.urgency(a.expiresInDays);
+    return '<span class="chip"><i class="dot" style="background:' + colors[u] + '"></i>' + Sous.esc(a.name) + ' · ' + Sous.esc(Sous.when(a.expiresInDays).toLowerCase()) + '</span>';
+  }).join('');
+  rail.innerHTML = list.map(function (s, n) {
+    var g = s.gradient || ['#f6a72a', '#ef563c'];
+    var uses = (s.uses || []).slice(0, 2).map(function (u) {
+      var k = Sous.urgency(u.expiresInDays);
+      return '<span class="chip"><i class="dot" style="background:' + colors[k] + '"></i>' + Sous.esc(u.name) + (u.expiresInDays != null ? ' · ' + Sous.esc(Sous.when(u.expiresInDays).toLowerCase()) : '') + '</span>';
+    }).join('');
+    var miss = s.missing || [];
+    var need = miss.length ? '<div class="need">Need: ' + miss.map(function (m) { return Sous.esc(m.name); }).join(', ') + '</div>'
+                           : '<div class="need ok">✓ Everything is already in your kitchen</div>';
+    var extra = s.steps ? '<div class="ai">✨ ' + (s.engine === 'bedrock' ? 'Improvised with Amazon Bedrock · allergy-checked' : 'Template recipe · allergy-checked') + '</div>' +
+      '<ol class="steps">' + s.steps.slice(0, 3).map(function (t) { return '<li>' + Sous.esc(t) + '</li>'; }).join('') + '</ol>' : '';
+    return '<article class="card rise' + (n === 0 ? ' first' : '') + '" style="--g1:' + g[0] + ';--g2:' + g[1] + ';animation-delay:' + (n * 90) + 'ms">' +
+      '<div class="band"><span class="idx">' + (n + 1) + '</span><span class="emoji" style="animation-delay:' + (150 + n * 90) + 'ms">' + Sous.esc(s.emoji || '🍽️') + '</span>' +
+      '<div class="pills"><span class="pill">⏱ ' + Sous.esc(s.minutes) + ' min</span>' + (s.kidFriendly ? '<span class="pill">Kid-friendly</span>' : '') + '</div></div>' +
+      '<div class="body"><div class="title">' + Sous.esc(s.title) + '</div>' + (s.reason ? '<div class="reason">' + Sous.esc(s.reason) + '</div>' : '') +
+      '<div class="uses">' + uses + '</div>' + need + extra +
+      '<div class="cfoot"><div class="rescue">Rescues<b>' + Sous.money(s.rescueValueUsd) + '</b></div><div class="acts">' +
+      (miss.length ? '<button class="btn btn-ghost btn-sm" data-cart="' + Sous.esc(s.recipeId) + '">+ Cart</button>' : '') +
+      '<button class="btn btn-primary btn-sm" data-cook="' + Sous.esc(s.recipeId) + '">Cook this</button></div></div></div></article>';
+  }).join('') || '<p class="sub" style="padding:40px 0">No recipe fits right now. Ask Sous to improvise one.</p>';
+  rail.querySelectorAll('[data-cook]').forEach(function (b) { Sous.bind(b, 'cook_start', { recipeId: b.getAttribute('data-cook') }); });
+  rail.querySelectorAll('[data-cart]').forEach(function (b) { Sous.bind(b, 'shopping_cart_build', { recipeIds: [b.getAttribute('data-cart')] }); });
+  var ex = d.excluded || [];
+  var guard = document.getElementById('guard');
+  guard.hidden = !ex.length;
+  document.getElementById('guardText').innerHTML = '<b>Allergy guard</b> &nbsp;' + ex.map(function (e) { return Sous.esc(e.title) + ' skipped: ' + Sous.esc(e.reason); }).join(' · ');
+  document.getElementById('app').hidden = false;
+  rail.scrollLeft = 0; setTimeout(syncArrows, 50);
+});
+</script>
+</body></html>
