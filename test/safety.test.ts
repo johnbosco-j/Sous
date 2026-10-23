@@ -268,3 +268,16 @@ describe('tool metadata', () => {
     }
   });
 });
+
+describe('emergency alert card (MCP Apps)', () => {
+  it('links allergy_emergency to the ui://sous/alert.html view and marks the result with view "alert"', async () => {
+    const { callTool } = await import('../src/mcp/server.js');
+    const res = await callTool('allergy_emergency', { description: "Leo's lips are swelling after eating", member: 'Leo' });
+    const sc = res.structuredContent as any;
+    expect(sc.view).toBe('alert');
+    expect(sc.data.level).toBe('emergency');
+    const { toolViewMap, viewHtml } = await import('../src/mcp/server.js');
+    expect(toolViewMap().allergy_emergency).toBe('ui://sous/alert.html');
+    expect(viewHtml('alert' as any)).toMatch(/Call 911 now/);
+  });
+});

@@ -81,12 +81,12 @@ describe('tool metadata (MCP 2025-11-25)', () => {
 });
 
 describe('resources, templates and prompts', () => {
-  it('lists 3 sous:// data resources and 5 ui:// MCP Apps views', async () => {
+  it('lists 3 sous:// data resources and 6 ui:// MCP Apps views', async () => {
     const { resources } = await client.listResources();
     const data = resources.filter(r => r.uri.startsWith('sous://'));
     const ui = resources.filter(r => r.uri.startsWith('ui://sous/'));
     expect(data.map(r => r.uri).sort()).toEqual(['sous://household', 'sous://impact', 'sous://pantry']);
-    expect(ui).toHaveLength(5);
+    expect(ui).toHaveLength(6);
     for (const r of ui) expect(r.mimeType).toBe('text/html;profile=mcp-app');
   });
 

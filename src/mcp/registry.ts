@@ -2,7 +2,7 @@
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import type { z } from 'zod';
 
-export type View = 'meals' | 'cook' | 'cart' | 'pantry' | 'impact';
+export type View = 'meals' | 'cook' | 'cart' | 'pantry' | 'impact' | 'alert';
 
 export interface FollowUp { prompt: string; tool: string; arguments: Record<string, unknown> }
 export interface Envelope {

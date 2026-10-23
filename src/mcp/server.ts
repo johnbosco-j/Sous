@@ -150,6 +150,8 @@ tool({
     if (rest.length) speech += ` Also on screen: ${listPhrase(rest.map(r => r.title))}.`;
     const allergy = res.excluded.find(e => /allergic/.test(e.reason));
     if (allergy) speech += ` I left out ${allergy.title} because ${allergy.reason}.`;
+    const diet = res.excluded.find(e => /\bneeds\b|vegetarian|diet|free\b/.test(e.reason));
+    if (diet) speech += ` And ${diet.title} is set aside: ${diet.reason}.`;
     return env('meal_suggest', speech, res as any, {
       view: 'meals',
       followUp: { prompt: `Want to start cooking ${top.title}?`, tool: 'cook_start', arguments: { recipeId: top.recipeId } }
@@ -459,7 +461,12 @@ tool({
     if (action === 'get') {
       const h = getState().household;
       const label = (a: string) => ({ peanut: 'peanuts', 'tree-nut': 'tree nuts', egg: 'eggs' } as Record<string, string>)[a] ?? a;
-      const facts = h.members.flatMap(m => [...m.allergies.map(a => `${m.name} is allergic to ${label(a)}`), ...m.dislikes.map(d => `${m.name} doesn't like ${d}`)]);
+      const diets = (getState().ext?.safety?.diets ?? {}) as Record<string, string[]>;
+      const facts = h.members.flatMap(m => [
+        ...m.allergies.map(a => `${m.name} is allergic to ${label(a)}`),
+        ...m.dislikes.map(d => `${m.name} doesn't like ${d}`),
+        ...(diets[m.name] ?? diets[m.name.toLowerCase()] ?? []).map(n => `${m.name} needs ${n.replace(/-/g, ' ')} meals`)
+      ]);
       return env('household_memory', facts.length ? `Here's what I remember: ${listPhrase(facts)}.` : "I don't have any allergies or dislikes saved yet.", { household: h });
     }
     if (!kind || !value) return fail('household_memory', 'What should I remember, and for whom?');
@@ -687,7 +694,7 @@ const ENVELOPE_SCHEMA = {
     ok: { type: 'boolean' },
     tool: { type: 'string' },
     speech: { type: 'string', description: 'Short, voice-ready line to speak' },
-    view: { type: 'string', enum: ['meals', 'cook', 'cart', 'pantry', 'impact'] },
+    view: { type: 'string', enum: ['meals', 'cook', 'cart', 'pantry', 'impact', 'alert'] },
     data: { type: 'object', additionalProperties: true },
     followUp: {
       type: 'object',
@@ -743,7 +750,7 @@ export async function callTool(name: string, args: unknown): Promise<CallToolRes
   }
 }
 
-const VIEWS: View[] = ['meals', 'cook', 'cart', 'pantry', 'impact'];
+const VIEWS: View[] = ['meals', 'cook', 'cart', 'pantry', 'impact', 'alert'];
 const UI_DIR = resolve(process.env.SOUS_UI_DIR ?? 'ui');
 
 export function viewHtml(view: View): string {

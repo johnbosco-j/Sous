@@ -50,7 +50,7 @@ describe('MCP over Streamable HTTP', () => {
 
   it('serves MCP App views as text/html;profile=mcp-app resources', async () => {
     const { resources } = await client.listResources();
-    expect(resources.filter(r => r.uri.startsWith('ui://sous/'))).toHaveLength(5);
+    expect(resources.filter(r => r.uri.startsWith('ui://sous/'))).toHaveLength(6);
     const res = await client.readResource({ uri: 'ui://sous/meals.html' });
     expect(res.contents[0].mimeType).toBe('text/html;profile=mcp-app');
     expect((res.contents[0] as { text: string }).text).toMatch(/<html/i);

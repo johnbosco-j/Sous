@@ -62,6 +62,7 @@ tool({
   }),
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   icon: '🚨',
+  view: 'alert',
   handler: ({ description, member }) => {
     const household = getState().household;
     const who = member?.trim() || memberIn(description, household);
@@ -75,7 +76,7 @@ tool({
       s.ext.safety.incidents.push({ at: new Date().toISOString(), member: who ?? null, level, signs: [...signs.emergency, ...signs.watch], description: description.slice(0, 200) });
       s.ext.safety.incidents = s.ext.safety.incidents.slice(-50);
     });
-    return env('allergy_emergency', speech, { level, member: who ?? null, signs, knownAllergies, call: level === 'emergency' ? '911' : null });
+    return env('allergy_emergency', speech, { level, member: who ?? null, signs, knownAllergies, call: level === 'emergency' ? '911' : null }, { view: 'alert' });
   }
 });
 
