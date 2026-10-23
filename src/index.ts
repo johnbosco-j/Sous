@@ -8,7 +8,7 @@ import { isInitializeRequest, LATEST_PROTOCOL_VERSION } from '@modelcontextproto
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { bedrockConfig, bedrockStatus } from './aws/bedrock.js';
 import { getSession, resetSessions } from './agent/agent.js';
-import { impact } from './domain/kitchen.js';
+import { impact, pantryView } from './domain/kitchen.js';
 import { activeTimers, getState, resetState } from './domain/store.js';
 import { SERVER_VERSION, TOOL_NAMES, createSousServer } from './mcp/server.js';
 
@@ -111,7 +111,8 @@ export function createApp() {
 
   app.get('/api/state', (_req, res) => {
     const s = getState();
-    res.json({ timers: activeTimers(), impact: impact(s), household: s.household, cooking: s.cooking, bedrock: bedrockStatus().available, bedrockStatus: bedrockStatus() });
+    const atRisk = pantryView(s).filter(p => p.expiresInDays !== null && p.expiresInDays >= 0 && p.expiresInDays <= 3);
+    res.json({ timers: activeTimers(), impact: impact(s), household: s.household, cooking: s.cooking, atRisk, bedrock: bedrockStatus().available, bedrockStatus: bedrockStatus() });
   });
 
   app.post('/api/reset', async (_req, res) => {

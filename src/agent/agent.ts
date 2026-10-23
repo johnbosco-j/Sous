@@ -13,6 +13,8 @@ import { NO, PLAN_WEEK, YES, route } from './rules.js';
 export interface ToolCallTrace { name: string; arguments: Record<string, unknown>; ms: number; ok: boolean }
 export interface AgentResponse {
   speech: string;
+  /** Raw result of a direct (touch) tool call, so an MCP App view gets its tools/call reply even without a UI. */
+  result?: CallToolResult;
   engine: 'bedrock' | 'rules';
   toolCalls: ToolCallTrace[];
   ui: null | { resourceUri: string; html: string; toolInput: Record<string, unknown>; toolResult: CallToolResult };
@@ -155,7 +157,7 @@ class AgentSession {
     const turn = new Turn(true);
     turn.userText = `(Tapped on screen: ${name})`;
     turn.lastResult = await this.call(name, args, turn);
-    return this.respond(turn, 'rules');
+    return { ...this.respond(turn, 'rules'), result: turn.lastResult };
   }
 
   private async rulesTurn(text: string, turn: Turn) {

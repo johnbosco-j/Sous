@@ -75,7 +75,10 @@ A typical evening with the demo household, the Riveras (Leo, 8, is allergic to p
 ### Safety and trust design
 These rules live in deterministic code, not in the prompt.
 - **Allergen guard.** Recipes containing a household member's allergen are excluded before ranking, and the reason is shown ("Leo is allergic to peanuts"). LLM-generated recipes from `chef_improvise` pass through the same guard before they are shown.
-- **Confirm-before-buy.** Checkout requires both the `cartToken` from the cart the user just saw and an explicit confirmation. A stale or altered cart is rejected. The order is clearly labeled *simulated*.
+- **Confirm-before-buy, enforced twice.**
+  - The server requires the `cartToken` from the cart the user just saw plus `confirmed=true`, and it rejects stale (over 30 minutes) or unknown carts.
+  - The agent host adds a second gate. If the model calls `shopping_checkout` with `confirmed=true` but the user's latest turn contained no explicit consent, the host downgrades the call to `confirmed=false`. Sous then asks instead of buying. A test proves this.
+  - Orders are clearly labeled *simulated*.
 - **Grounded answers.** Expiry dates, prices and quantities come from the pantry and catalog, never from the model. Impact uses a fixed, documented factor of 2.5 kg CO2e per kg of food rescued.
 
 ### Potential impact
@@ -95,7 +98,7 @@ Everything in this repository was built on **23 October 2026**, within the submi
 - Node.js 20+, TypeScript, Express 5, `@modelcontextprotocol/sdk` 1.32 for the server and the agent's client, and Zod 4 for schemas.
 - Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime`.
 - Vanilla HTML/CSS/JS for MCP Apps views, so each view is a single self-contained file. Three.js for the landing hero.
-- Vitest for the planner, guards and transport tests.
+- **29 Vitest tests:** planner ranking, allergen and dislike exclusion, cart and checkout (token, expiry, idempotent replay), MCP over real Streamable HTTP, the Bedrock tool loop against a scripted Converse mock, and the consent gate that blocks a model-initiated purchase.
 - AI pair-programming with Claude Code for scaffolding and parallel workstreams.
 
 ### Challenges
@@ -123,6 +126,8 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
    3. It executes each `toolUse` as an MCP `tools/call` and feeds back `toolResult` blocks until the model returns the final spoken answer.
 
    Every call is visible in the MCP trace drawer.
+
+   A **circuit breaker** pauses Bedrock for 5 minutes after an auth, access or model error, and the deterministic engine answers instead. A misconfigured key therefore never makes a voice turn hang.
 2. **Amazon Bedrock inside a tool.** `chef_improvise` asks a Bedrock model to invent a recipe from the at-risk ingredients. The output is parsed to JSON and then passes the **deterministic allergen guard** before Sous will show or speak it. If Bedrock is unconfigured or times out, a template recipe is used instead. `structuredContent.data.suggestions[0].engine` records which path ran.
 3. **Auth and config.** Configure via `.env`: either a Bedrock API key (`AWS_BEARER_TOKEN_BEDROCK`) or the standard AWS credential chain, plus `AWS_REGION` and `BEDROCK_MODEL_ID` (default: the Amazon Nova Pro inference profile `us.amazon.nova-pro-v1:0`). `SOUS_BEDROCK=auto|off` sets the mode. Each Bedrock call has a hard time budget (`BEDROCK_TIMEOUT_MS`, default 8 s), because a voice turn can't hang. The agent allows at most 4 tool rounds per turn.
 
@@ -144,9 +149,9 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
   - `structuredContent` + `outputSchema` are exactly what a voice agent needs: short speech plus machine-readable data.
   - Tool annotations (`destructiveHint` on checkout) map naturally to "ask before buying".
 - **What needs work:**
-  - The SDK's low-level vs. high-level server APIs overlap. It took time to work out which one exposes `_meta` on tool definitions for MCP Apps.
-  - The spec has moved past 2025-11-25 (the 2026-07-28 revision removes protocol sessions). The hackathon says "2025-11-25 or later, once confirmed", and it is unclear which later revisions Alexa+ accepts.
-- **Onboarding:** fast. Going from `npm install` to a working `tools/list` with the MCP Inspector took well under an hour.
+  - The spec has moved past 2025-11-25: the 2026-07-28 revision removes protocol sessions. The hackathon says "2025-11-25 or later, once confirmed", and it is unclear which later revisions Alexa+ accepts.
+  - Tool input schemas generated from Zod are valid JSON Schema, but they are not directly portable to LLM tool APIs (see Bedrock below). A "portable schema" profile in the spec would help every agent host.
+- **Onboarding:** smooth. We used the low-level `Server` API so one tool table emits `inputSchema`, `outputSchema`, annotations, icons and `_meta.ui` uniformly. The SDK's shared types (`Tool`, `CallToolResult`) let our server and our in-process Alexa+ stand-in client share one contract.
 - **Would we build with it again?** Yes. It is the cleanest way to make one backend work with Alexa+ and every other agent host.
 
 ### 2. MCP Apps extension (`io.modelcontextprotocol/ui`, spec 2026-01-26)
@@ -179,9 +184,10 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
   - The Converse API's model-agnostic `toolSpec`/`toolUse`/`toolResult` shape maps almost 1:1 onto MCP `tools/list` and `tools/call`. We switch models by changing `BEDROCK_MODEL_ID`.
   - Bedrock API keys (`AWS_BEARER_TOKEN_BEDROCK`) are much simpler for hackathon setups than IAM users.
 - **What needs work:**
-  - We found Python and cURL examples for API-key auth, but no official JavaScript v3 example combining a bearer token with Converse tool use.
-  - MCP JSON Schemas sometimes need small cleanup before they are valid `toolSpec.inputSchema.json`.
-  - The hackathon's AWS credit codes ran out on Oct 7, so late joiners had to use their own account or the free tier.
+  - **Schema portability.** Different Bedrock models accept different subsets of JSON Schema in `toolSpec.inputSchema.json`, and we found no single documented portable subset. We strip MCP/Zod schemas down to `type`, `properties`, `required`, `description`, `enum` and `items` before sending them.
+  - **Credential errors.** Our cloud dev container had AWS keys in its environment that Bedrock rejected: `UnrecognizedClientException: The security token included in the request is invalid`. The error doesn't say which credential source the SDK used (env keys, profile, or a Bedrock API key). Every voice turn paid a failed round-trip until we added a circuit breaker.
+  - **Docs.** We found Python and cURL examples for API-key auth, but no official JavaScript v3 example combining a bearer token with Converse tool use.
+  - **Credits.** The hackathon's AWS credit codes ran out on Oct 7, so late joiners had to use their own account or the free tier.
 - **Onboarding:** good. Converse is the right abstraction.
 - **Would we build with it again?** Yes. Bedrock with MCP is a natural pair for Alexa+ add-ons.
 
@@ -203,6 +209,8 @@ Account linking (OAuth 2.1 + PKCE), a real Amazon Fresh cart handoff, receipt an
 | 4 | Official JS/TS sample: Bedrock Converse tool-use loop over an MCP client (with API-key auth) | It is the glue every Alexa+ and AWS Builder team writes by hand | **Important** |
 | 5 | Kitchen-timer and list primitives exposed to add-ons (start an Alexa timer, add to an Alexa shopping list) | Our cook mode re-implements timers that Alexa already has natively | **Important** |
 | 6 | Clarify which MCP spec versions after 2025-11-25 Alexa+ accepts (e.g. 2026-07-28 sessionless) | Avoids building against a transport behavior Alexa+ may not support | **Nice-to-have** |
+| 7 | Bedrock Converse: publish the portable JSON Schema subset for `toolSpec` (or normalize schemas server-side) | Every MCP → Bedrock bridge must currently guess which keywords each model accepts | **Important** |
+| 8 | Bedrock auth errors that name the credential source used (env keys / profile / API key) | We lost time to an `UnrecognizedClientException` from invalid credentials in the environment, with no hint which source the SDK had picked | **Nice-to-have** |
 
 ---
 
