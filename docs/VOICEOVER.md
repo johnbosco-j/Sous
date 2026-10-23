@@ -1,116 +1,115 @@
-# Sous: voiceover for `sous-demo.mp4` (2:31)
+# Sous: voiceover for `sous-demo.mp4` (2:31.6)
 
-TTS-ready script. `(breath)` is about 0.4 s, `...` is a short beat (about 0.5 s), and `<#x#>` is a pause of x seconds.
-Timed for about 150 words per minute (most narration voices at speed 1.0). Every block starts on the cue in the table below.
-If your TTS runs fast or slow, nudge each block to its cue in the editor instead of changing the words.
+TTS-ready script, fitted to the measured speaking rate of the narration voice (about 132 words per minute,
+measured from a 2:54 render of the first draft). `(breath)` is about 0.5 s, `...` is a short beat (about 0.35 s),
+and `<#x#>` is a pause of x seconds. Every line starts on its video cue (table below); if a render drifts,
+nudge that clip to its cue in the editor.
 
 ## Script
 
 ```
-<#0.5#>
-
-Every evening, in millions of kitchens, the same question comes up... what's for dinner?
-
-(breath)
-
-This is Sous... a zero-waste kitchen agent for Alexa plus.
-
 <#0.3#>
 
-Up to forty percent of America's food is wasted. Most of it dies quietly in the fridge... while we decide what to cook.
-
-<#1.6#>
-
-So we simply ask... Alexa, what should we cook tonight?
+Every evening, in millions of kitchens, the same question... what's for dinner?
 
 (breath)
 
-Sous ranks recipes by the expiring food they rescue. Peanut noodles never appear... Leo is allergic, and that rule lives in code.
+This is Sous, a zero-waste kitchen agent for Alexa plus.
 
-<#1.5#>
+<#0.2#>
+
+Up to forty percent of America's food is wasted... and most of it dies quietly, in our own fridges.
+
+<#1.9#>
+
+So we ask... Alexa, what should we cook tonight?
+
+(breath)
+
+Sous ranks recipes by the expiring food they rescue. Peanut noodles never appear. Leo's allergic, so it's blocked in code.
+
+<#0.9#>
 
 What's about to expire? The pantry, sorted by urgency... twenty-three dollars of food at risk.
 
-<#2.4#>
+<#1.3#>
 
-Tell it once that Ava doesn't like mushrooms... and Sous remembers it for every future meal.
+Tell it once that Ava doesn't like mushrooms... and Sous remembers it, for every meal.
 
-<#0.6#>
+<#0.4#>
 
-Now, a bigger ask... plan dinners for the next three nights.
+A bigger ask: plan dinners for the next three nights.
 
-<#0.5#>
+One sentence, three M C P tool calls... suggest, save the plan, build the cart. All in the live trace.
 
-One sentence... three M C P tool calls. Suggest, save the plan, build the cart... each one right there in the live trace.
+<#0.8#>
 
-(breath)
+Nothing is bought until I say yes. One-time cart token, so the order goes through exactly once.
 
-Nothing is bought until I say yes. The cart carries a one-time token, so the order goes through... exactly once.
+<#0.7#>
 
-(breath)
+Now we cook, hands-free. Every step, big enough to read across the room.
 
-Now we cook, completely hands-free. Alexa reads every step on the Echo Show, big enough to follow from across the room.
+<#2.5#>
 
-(breath)
+When a step needs time, Sous offers a timer... I just say yes.
 
-When a step needs time... Sous offers a timer, and I just say yes.
-
-<#1.2#>
+<#1.0#>
 
 My hands are busy, so I tap Next instead... voice and touch call the same M C P tools.
 
-<#1.5#>
+<#1.7#>
 
-Every step stays on screen, with the ingredients ticked off.
+Every step stays on screen, ingredients ticked off.
 
-<#1.8#>
+<#0.8#>
 
-Dinner's ready. Sous logs what we rescued... six dollars seventy-nine of food, saved from the bin.
+Dinner's ready. Sous logged six seventy-nine of food, saved from the bin.
 
-(breath)
+<#1.1#>
 
-Out of ideas? Sous improvises from what's expiring, with Amazon Bedrock when it's on... and the allergen guard checks every idea.
+Out of ideas? Sous can improvise with Amazon Bedrock... and the allergen guard checks every idea.
 
-(breath)
+<#1.1#>
 
-It adds up. Twenty-two dollars rescued this week... nine kilos of C O two avoided... over a thousand dollars a year.
+Twenty-two dollars rescued this week, nine kilos of C O two... over a thousand dollars a year.
 
-<#0.5#>
+<#1.1#>
 
 Now, a brand-new session. New conversation... same household.
 
-<#1.2#>
+<#0.4#>
 
 Sous still knows Leo's peanut allergy, and Ava's mushrooms. That's real memory, across sessions.
 
-<#1.7#>
+<#1.1#>
 
 Sous. Less waste... better dinners. Built for Alexa plus.
 
-<#1.7#>
+<#1.0#>
 ```
 
-## Cue sheet (video time → what is on screen → line that starts there)
+## Cue sheet (video time → line that starts there)
 
-| Cue | On screen | Line |
-| --- | --- | --- |
-| 0:00.5 | Landing hero, 3D scene | "Every evening, in millions of kitchens…" |
-| 0:07.0 | Hero headline | "This is Sous…" |
-| 0:11.8 | Scroll through the problem stats | "Up to forty percent…" |
-| 0:22.7 | Echo Show simulator appears | "So we simply ask…" |
-| 0:27.2 | Recipe carousel + allergy strip | "Sous ranks recipes…" |
-| 0:37.6 | "What's about to expire?" → pantry | "What's about to expire?…" |
-| 0:46.5 | Household memory | "Tell it once…" |
-| 0:54.0 | "Plan dinners…" → cart | "Now, a bigger ask…" |
-| 0:59.0 | MCP trace drawer open | "One sentence… three M C P tool calls…" |
-| 1:08.7 | "Yes, place the order" → order placed | "Nothing is bought until I say yes…" |
-| 1:17.6 | Cook mode, step 1 | "Now we cook…" |
-| 1:26.4 | Step 2, timer offered | "When a step needs time…" |
-| 1:33.7 | Timer set, tapping Next | "My hands are busy…" |
-| 1:42.9 | Steps 3–6 | "Every step stays on screen…" |
-| 1:48.7 | "Dinner's ready" + confetti | "Dinner's ready…" |
-| 1:55.7 | Improvised recipe card | "Out of ideas?…" |
-| 2:04.4 | Impact dashboard | "It adds up…" |
-| 2:14.0 | New session | "Now, a brand-new session…" |
-| 2:18.9 | Memory answer | "Sous still knows…" |
-| 2:26.2 | End card | "Sous. Less waste…" |
+```
+0:00.3  Every evening, in millions of kitchens, the same question... what's for dinner?
+0:06.6  This is Sous, a zero-waste kitchen agent for Alexa plus.
+0:11.8  Up to forty percent of America's food is wasted... and most of it dies quietly, in our own fridges.
+0:22.7  So we ask... Alexa, what should we cook tonight?
+0:27.6  Sous ranks recipes by the expiring food they rescue. Peanut noodles never appear. Leo's allergic, so it's blocked in code.
+0:37.6  What's about to expire? The pantry, sorted by urgency... twenty-three dollars of food at risk.
+0:46.5  Tell it once that Ava doesn't like mushrooms... and Sous remembers it, for every meal.
+0:54.0  A bigger ask: plan dinners for the next three nights.
+0:58.5  One sentence, three M C P tool calls... suggest, save the plan, build the cart. All in the live trace.
+1:08.7  Nothing is bought until I say yes. One-time cart token, so the order goes through exactly once.
+1:17.6  Now we cook, hands-free. Every step, big enough to read across the room.
+1:26.4  When a step needs time, Sous offers a timer... I just say yes.
+1:33.6  My hands are busy, so I tap Next instead... voice and touch call the same M C P tools.
+1:44.3  Every step stays on screen, ingredients ticked off.
+1:48.7  Dinner's ready. Sous logged six seventy-nine of food, saved from the bin.
+1:55.7  Out of ideas? Sous can improvise with Amazon Bedrock... and the allergen guard checks every idea.
+2:04.4  Twenty-two dollars rescued this week, nine kilos of C O two... over a thousand dollars a year.
+2:14.0  Now, a brand-new session. New conversation... same household.
+2:18.8  Sous still knows Leo's peanut allergy, and Ava's mushrooms. That's real memory, across sessions.
+2:26.2  Sous. Less waste... better dinners. Built for Alexa plus.
+```
