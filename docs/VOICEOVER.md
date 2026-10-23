@@ -1,11 +1,7 @@
-# Sous: voiceover for `sous-demo.mp4` (2:31.6)
+# Sous: voiceover for `sous-demo.mp4` (2:32)
 
-TTS-ready script, fitted to the measured speaking rate of the narration voice (about 132 words per minute,
-measured from a 2:54 render of the first draft). `(breath)` is about 0.5 s, `...` is a short beat (about 0.35 s),
-and `<#x#>` is a pause of x seconds. Every line starts on its video cue (table below); if a render drifts,
-nudge that clip to its cue in the editor.
-
-## Script
+Final MiniMax script (speech-2.8-hd, speed 1). It renders at 2:32 and is in sync with the video.
+`(breath)` is a sound tag, `<#x#>` is a pause of x seconds, and `...` is a short beat.
 
 ```
 <#0.3#>
@@ -86,7 +82,7 @@ Sous still knows Leo's peanut allergy, and Ava's mushrooms. That's real memory, 
 
 Sous. Less waste... better dinners. Built for Alexa plus.
 
-<#1.0#>
+<#1.5#>
 ```
 
 ## Cue sheet (video time → line that starts there)
