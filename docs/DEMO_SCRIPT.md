@@ -1,38 +1,51 @@
-# Sous: demo video script (target 2:45, hard limit under 3:00)
+# Sous: demo voiceover (read over the auto-recorded video)
 
-**Rules recap:** public on YouTube, in English, shows the project working, no copyrighted music or third-party footage. Judges may stop watching at 3:00, so the best moment comes first.
+The video is a captioned run of the Echo Show simulator, with chapter labels **1–9** and an end card. Read each block when its chapter label appears. Timings are targets: if a chapter on screen runs shorter or longer, pause or trim rather than rush. The whole thing must stay **under 2:50**, so judges see everything before the 3:00 cut-off. About 370 words, a calm pace.
 
-**Setup before you hit record**
-1. `npm start`, then open **Chrome** (not Brave, which has no speech recognition) at `http://localhost:8787/device`. Use full screen (F11 or ⌃⌘F) and zoom the browser until the device fills a 1920×1080 frame.
-2. Click **Reset demo** so the pantry, expiry dates and impact counters start fresh.
-3. If you have Bedrock set up (`.env`), confirm the trace drawer badge says **bedrock**. That is your AWS Builder proof on camera. If it says **rules**, the demo still works; just don't claim Bedrock in that shot.
-4. Open a second tab at `http://localhost:8787/` (the landing page) for the title shot.
-5. Turn system volume up so Alexa's voice is recorded. On macOS, OBS with "macOS Screen Capture (Application audio)" works; QuickTime alone does not capture system audio.
 
 ---
 
-| Time | Shot (what's on screen) | Action | Voiceover / on-screen text |
-|---|---|---|---|
-| **0:00–0:14** | Echo Show simulator, ambient clock screen | Click the mic and say, or click the chip, **"What should we cook tonight?"** The meal carousel slides in: recipe cards with "expires tomorrow" chips and a **Peanut Noodles: excluded, Leo is allergic to peanuts** strip. | Let Alexa's spoken answer play. Caption: *"Alexa+ · powered by Sous"* |
-| 0:14–0:26 | Landing page hero (3D scene) | Slow scroll to the stats section | VO: "Americans waste 30 to 40 percent of their food supply. That's nearly 800 dollars per person, every year. Most of it isn't carelessness. Nobody remembers what's about to expire. So we built **Sous**, the zero-waste kitchen agent for Alexa+." |
-| 0:26–0:42 | Back to device | Chip **"What's about to expire?"** The pantry grid appears, sorted by urgency with red and amber badges and an "at risk $X" headline. | VO: "Sous is a self-hosted MCP server. Alexa+ calls its tools, and on an Echo Show it answers with interactive MCP Apps cards like this one." |
-| 0:42–0:55 | Device | Chip **"Remember Ava doesn't like mushrooms."** | VO: "It remembers the household (allergies, dislikes) across sessions. Allergies are enforced in deterministic code, never left to the model." |
-| 0:55–1:20 | Device, cook card | Chip **"Let's cook the first one"**: a giant step card appears. **Tap the on-screen Next button** (touch) and then say **"Next step"** (voice). | VO: "Your hands are covered in flour, so cooking is hands-free. Touch and voice call the same MCP tools." |
-| 1:20–1:30 | Device, timer chip counting down | Chip **"Set a timer for 10 minutes"** | VO: "Timers run right on the card." |
-| 1:30–1:55 | Device, cart card | Chip **"Add what we're missing to the cart"**: an itemized Amazon Fresh (simulated) cart with a total and a "say yes to confirm" banner. Then chip **"Yes, place the order"**: an order confirmation with order ID and ETA. | VO: "Sous buys only what you're missing, and nothing gets ordered until you say yes. Checkout requires a one-time cart token and an explicit confirmation, so the model can't buy anything on its own." |
-| 1:55–2:10 | Device, impact card | Chip **"How much food have we saved?"**: dollars rescued, kilograms, CO2e, a 7-day bar chart and a yearly projection. | VO: "And it shows what that's worth: money saved, food rescued, emissions avoided." |
-| **2:10–2:32** | Press **`t`**: the MCP trace drawer slides open | Scroll the drawer slowly: `meal_suggest`, `household_memory`, `cook_start`, `shopping_checkout` with `cartToken` and `confirmed: true`, the ms timings, and the **bedrock** badge. Optionally cut for 3 s to MCP Inspector showing `tools/list` at `http://localhost:8787/mcp`. | VO: "Under the hood: MCP spec 2025-11-25 over Streamable HTTP, tool annotations and structured output, and MCP Apps views served as ui:// resources. The agent loop runs on Amazon Bedrock's Converse API, calling Sous's tools over MCP." |
-| 2:32–2:45 | Landing page final section / GitHub repo page | Hold on the logo and URL | VO: "One integration works for Echo Show, Fire TV and the Alexa app, and with any MCP host. **Sous. Cook what you have.**" Text: `github.com/johnbosco-j/sous · MIT` |
+The timestamps below are from the final auto-recorded video (`sous-demo.mp4`, 2:31). Each block is sized to fit its segment at a calm pace, about 2.5 words per second. This take ran on the deterministic engine because no Bedrock key was available, so the lines say "the agent", not "Bedrock", where it matters.
+
+**Intro: landing page (0:00–0:21)**
+> This is Sous, a zero-waste kitchen agent for Alexa+. Americans waste thirty to forty percent of their food supply, and most of it dies quietly in the fridge, because "what's for dinner?" gets answered from habit instead of from what's about to expire.
+
+**1 · Planning (0:21–0:37)**
+> So we ask Alexa: "What should we cook tonight?" Sous ranks every recipe by how much expiring food it rescues. Peanut Sesame Noodles never appears: Leo is allergic, and that rule lives in code, not in a prompt.
+
+**2 · Pantry (0:37–0:46)**
+> "What's about to expire?" The pantry, sorted by urgency, with twenty-three dollars of food at risk.
+
+**3 · Memory (0:46–0:54)**
+> Tell it once that Ava doesn't like mushrooms, and Sous remembers it on the server.
+
+**4 · Agentic chain + MCP trace (0:54–1:08)**
+> "Plan dinners for the next three nights." One sentence, three MCP tool calls: suggest, save the plan, build the cart. You can see each one in the live trace, over Streamable HTTP, spec 2025-11-25.
+
+**5 · Purchase gate (1:08–1:17)**
+> Nothing is bought until I say yes. The cart has a one-time token, and the order goes through exactly once.
+
+**6 · Cook mode: voice + touch (1:17–1:55)**
+> Now we cook, hands-free. Alexa reads each step on the Echo Show card. When a step needs time, Sous offers a timer, and I just say yes. My hands are busy, so I tap Next on the card instead: voice and touch call the same MCP tools. When dinner's ready, Sous records exactly what we rescued: spinach, tomatoes and leftover rice, six seventy-nine that would have gone in the bin.
+
+**7 · Improvise (1:55–2:04)**
+> Out of ideas? "Surprise me" invents a dish from what's expiring, using Amazon Bedrock when it's configured, and the allergen guard checks it either way.
+
+**8 · Impact (2:04–2:17)**
+> And it adds up: twenty-two dollars of food rescued this week, nine kilograms of emissions avoided, over a thousand dollars a year for one family.
+
+**9 · New session, same memory (2:17–2:26)**
+> Start a brand-new session, and Sous still knows Leo's allergy and Ava's mushrooms. That's state across sessions.
+
+**End card (2:26–2:31)**
+> Sous. Less waste, better dinners. Open source on GitHub.
 
 ---
 
-### Backup plan
-- If voice recognition misfires, click the chips. They send the same utterance.
-- If Bedrock is slow or fails during a take, unset the key and record with the `rules` engine. Cut the "Amazon Bedrock" sentence or show it only in the trace shot of a working take.
-- Record the 0:00–0:14 cold open twice and keep the cleanest one.
-
-### Upload checklist
-- Export 1080p MP4 and check the length is **under 3:00** (aim for 2:45).
-- YouTube: Visibility **Public**, title "Sous: the zero-waste kitchen agent for Alexa+ (Amazon Developer Hackathon)". Put the repo link in the description.
-- No background music, or only music from the YouTube Audio Library.
-- Paste the URL into Devpost and into `docs/SUBMISSION.md`. Open the video in a private window to confirm it plays.
+### How to record it (about 10 minutes)
+1. Open the auto-recorded MP4 in **iMovie** (Mac: drag it onto the timeline, then click the microphone icon under the viewer for "Record Voiceover"). CapCut or Clipchamp work the same way on any OS.
+2. Use a quiet room and earbuds with a mic. Read each block as its chapter label appears. Re-record a single chapter if you stumble; don't redo the whole take.
+3. Keep the video's captions on screen. Use no background music, or only a track from the YouTube Audio Library.
+4. Export at **1080p** and confirm the length is **under 2:50**.
+5. Upload to YouTube with visibility **Public**, title "Sous: the zero-waste kitchen agent for Alexa+ (Amazon Developer Hackathon)", and the repo link in the description.
+6. Open the link in a private window to confirm it plays, then paste it into Devpost and into `docs/SUBMISSION.md`.
