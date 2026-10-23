@@ -1,0 +1,132 @@
+1
+00:00:00,300 --> 00:00:06,330
+Every evening, in millions of kitchens,
+the same question… what's for dinner?
+
+2
+00:00:06,600 --> 00:00:11,750
+This is Sous, a zero-waste kitchen agent
+for Alexa+.
+
+3
+00:00:11,800 --> 00:00:16,182
+Up to 40% of America's food is wasted…
+
+4
+00:00:16,222 --> 00:00:20,997
+and most of it dies quietly, in our own
+fridges.
+
+5
+00:00:22,700 --> 00:00:27,372
+So we ask… Alexa, what should we cook
+tonight?
+
+6
+00:00:27,600 --> 00:00:31,632
+Sous ranks recipes by the expiring food
+they rescue.
+
+7
+00:00:31,672 --> 00:00:36,900
+Peanut noodles never appear. Leo's
+allergic, so it's blocked in code.
+
+8
+00:00:37,600 --> 00:00:45,440
+What's about to expire? The pantry, sorted
+by urgency… $23 of food at risk.
+
+9
+00:00:46,500 --> 00:00:50,430
+Tell it once that Ava doesn't like
+mushrooms…
+
+10
+00:00:50,470 --> 00:00:53,887
+and Sous remembers it, for every meal.
+
+11
+00:00:54,000 --> 00:00:58,450
+A bigger ask: plan dinners for the next
+three nights.
+
+12
+00:00:58,500 --> 00:01:05,597
+One sentence, three MCP tool calls…
+suggest, save the plan, build the cart.
+
+13
+00:01:05,637 --> 00:01:08,150
+All in the live trace.
+
+14
+00:01:08,700 --> 00:01:11,827
+Nothing is bought until I say yes.
+
+15
+00:01:11,867 --> 00:01:17,095
+One-time cart token, so the order goes
+through exactly once.
+
+16
+00:01:17,600 --> 00:01:24,185
+Now we cook, hands-free. Every step, big
+enough to read across the room.
+
+17
+00:01:26,400 --> 00:01:32,882
+When a step needs time, Sous offers a
+timer… I just say yes.
+
+18
+00:01:33,600 --> 00:01:37,982
+My hands are busy, so I tap Next instead…
+
+19
+00:01:38,022 --> 00:01:42,797
+voice and touch call the same MCP tools.
+
+20
+00:01:44,300 --> 00:01:48,170
+Every step stays on screen, ingredients
+ticked off.
+
+21
+00:01:48,700 --> 00:01:54,832
+Dinner's ready. Sous logged $6.79 of food,
+saved from the bin.
+
+22
+00:01:55,700 --> 00:02:00,082
+Out of ideas? Sous can improvise with
+Amazon Bedrock…
+
+23
+00:02:00,122 --> 00:02:03,540
+and the allergen guard checks every idea.
+
+24
+00:02:04,400 --> 00:02:13,145
+$22 rescued this week, 9 kg of CO₂… over
+$1,000 a year.
+
+25
+00:02:14,000 --> 00:02:18,672
+Now, a brand-new session. New
+conversation… same household.
+
+26
+00:02:18,800 --> 00:02:22,832
+Sous still knows Leo's peanut allergy, and
+Ava's mushrooms.
+
+27
+00:02:22,872 --> 00:02:25,385
+That's real memory, across sessions.
+
+28
+00:02:26,200 --> 00:02:30,872
+Sous. Less waste… better dinners. Built
+for Alexa+.
+
