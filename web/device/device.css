@@ -6,6 +6,7 @@
   --top:64px;--trace:440px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
 button{font-family:inherit;color:inherit}
@@ -45,10 +46,10 @@ body.trace-open .scene{padding-right:calc(var(--trace) + 24px)}
 .camera{position:absolute;top:6px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#3c4d6b,#07090d 70%);box-shadow:0 0 0 2px #050506}
 .screen{position:relative;width:100%;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:#000;isolation:isolate}
 .shadow{position:absolute;left:8%;right:8%;bottom:-26px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent);filter:blur(6px);z-index:-1}
-.stage{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;overflow:hidden;background:#16100d}
+.stage{--app-h:708px;--strip-h:92px;position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;overflow:hidden;background:#0b0806}
 
 /* idle ambient */
-.idle{position:absolute;inset:0;padding:52px 60px;display:flex;flex-direction:column;transition:opacity .5s ease,transform .6s ease}
+.idle{position:absolute;left:0;top:0;width:1280px;height:var(--app-h);padding:46px 60px 40px;display:flex;flex-direction:column;transition:opacity .5s ease,transform .6s ease}
 .idle.hide{opacity:0;transform:scale(1.03);pointer-events:none}
 .idle-bg{position:absolute;inset:0;z-index:-1;
   background:radial-gradient(700px 500px at 82% 18%,rgba(246,167,42,.32),transparent 60%),radial-gradient(800px 600px at 10% 100%,rgba(239,86,60,.28),transparent 62%),
@@ -67,30 +68,35 @@ body.trace-open .scene{padding-right:calc(var(--trace) + 24px)}
 .ic-quote{font-family:var(--serif);font-style:italic;font-weight:500;font-size:36px;line-height:1.12;color:#bff3ff;margin-top:auto}
 
 /* MCP App iframes */
-.apphost{position:absolute;inset:0}
-.apphost iframe{position:absolute;inset:0;width:1280px;height:800px;border:0;background:#16100d;opacity:0;transform:translateY(16px) scale(.985);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+.apphost{position:absolute;left:0;top:0;width:1280px;height:var(--app-h);overflow:hidden}
+.apphost iframe{position:absolute;left:0;top:0;width:1280px;height:var(--app-h);border:0;background:#16100d;opacity:0;transform:translateY(16px) scale(.985);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
 .apphost iframe.in{opacity:1;transform:none}
 .apphost iframe.out{opacity:0;transform:scale(1.01)}
 
 /* timers */
-.timers{position:absolute;top:20px;right:22px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:4;pointer-events:none}
-.timer{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:999px;background:rgba(12,8,6,.82);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1.5px rgba(39,212,247,.5),0 12px 30px -10px rgba(0,0,0,.8);animation:tin .45s cubic-bezier(.2,.9,.3,1.3) both;cursor:default}
-.timer svg{width:46px;height:46px;transform:rotate(-90deg)}
+.timers{position:absolute;top:10px;left:50%;transform:translateX(-50%);flex-direction:row!important;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:4;pointer-events:none}
+.timer{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 6px;border-radius:999px;background:rgba(12,8,6,.82);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1.5px rgba(39,212,247,.5),0 12px 30px -10px rgba(0,0,0,.8);animation:tin .45s cubic-bezier(.2,.9,.3,1.3) both;cursor:default}
+.timer svg{width:36px;height:36px;transform:rotate(-90deg)}
 .timer .trk{stroke:rgba(255,255,255,.12)}.timer .arc{stroke:var(--cyan);transition:stroke-dashoffset 1s linear}
-.timer .tl{font:700 15px var(--sans);color:var(--muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer .tt{font:600 30px/1 var(--serif);font-variant-numeric:tabular-nums}
+.timer .tl{font:700 12px var(--sans);color:var(--muted);max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer .tt{font:600 24px/1 var(--serif);font-variant-numeric:tabular-nums}
 .timer.done{box-shadow:inset 0 0 0 2px var(--tomato),0 0 40px rgba(239,86,60,.55);animation:ring .5s ease-in-out infinite alternate;cursor:pointer}
 .timer.done .arc{stroke:var(--tomato)}
 @keyframes tin{from{opacity:0;transform:translateY(-12px) scale(.9)}}
 @keyframes ring{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
 
 /* caption */
-.caption{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:70px 60px 34px;pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(8,5,4,.86) 55%);opacity:0;transform:translateY(16px);transition:opacity .35s ease,transform .4s ease}
-.caption.show{opacity:1;transform:none}
-.cap-you{font:700 20px var(--sans);color:rgba(255,246,236,.6);margin-bottom:10px;min-height:1px}
-.cap-you:not(:empty)::before{content:"You  ";color:var(--cyan);letter-spacing:.14em;font-size:14px;text-transform:uppercase;font-weight:800}
-.cap-alexa{font:700 32px/1.28 var(--sans);color:#fff;max-width:1100px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+/* Alexa strip: a dedicated band under the MCP App, so captions never cover the view */
+.caption{position:absolute;left:0;right:0;bottom:0;height:var(--strip-h);z-index:3;display:flex;align-items:center;gap:24px;padding:0 36px 9px;
+  background:linear-gradient(180deg,#15100c,#0a0705);box-shadow:inset 0 1px 0 rgba(255,236,214,.09)}
+.caption::before{content:"";flex:none;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7cf0ff,#1f6fe0 70%);box-shadow:0 0 18px rgba(39,212,247,.55);opacity:.85}
+.cap-you{flex:none;max-width:300px;font:700 16px/1.25 var(--sans);color:rgba(255,246,236,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .4s}
+.cap-you:empty{display:none}
+.cap-you::before{content:"YOU  ";color:var(--cyan);letter-spacing:.14em;font-size:12px;font-weight:800}
+.cap-alexa{flex:1;min-width:0;font:700 23px/1.28 var(--sans);color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:opacity .5s,color .5s}
+.cap-alexa:empty::before{content:"Say “Alexa, what should we cook tonight?”";color:var(--dim);font-weight:600}
+.caption:not(.show) .cap-alexa{color:rgba(255,246,236,.62)}
+.caption:not(.show) .cap-you{opacity:.6}
 .cap-alexa .interim{color:rgba(255,255,255,.55);font-style:italic}
 
 /* Alexa light bar */

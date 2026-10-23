@@ -250,7 +250,7 @@ body::after {
 .marquee {
   position: relative; z-index: 2; overflow: hidden;
   border-block: 1px solid var(--line);
-  background: linear-gradient(90deg, rgba(236, 74, 47, .08), rgba(245, 165, 36, .06), rgba(92, 191, 115, .07));
+  background: linear-gradient(90deg, #1f120d, #1e160c, #131a10);
   padding: 18px 0;
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
@@ -350,7 +350,7 @@ section { position: relative; }
 .how { background: radial-gradient(1000px 600px at 50% 40%, rgba(47, 216, 255, .07), transparent 70%), var(--bg); }
 .diagram {
   margin: 64px 0 0; padding: clamp(14px, 2.4vw, 32px); border-radius: 28px;
-  border: 1px solid var(--line); background: linear-gradient(180deg, rgba(247, 239, 228, .035), rgba(247, 239, 228, .01));
+  border: 1px solid var(--line); background: linear-gradient(180deg, #19130f, #140f0b);
   box-shadow: 0 40px 120px rgba(0, 0, 0, .35);
 }
 .diagram svg { width: 100%; height: auto; overflow: visible; }
@@ -493,6 +493,7 @@ footer p { margin: 8px 0 0; max-width: 60ch; }
   .hero { align-items: end; }
   .hero-content { padding: 46vh 0 120px; }
   .hero-say { display: none; }
+  .float-chip { display: none; }
   .diagram .d-desktop { display: none; }
   .diagram .d-mobile { display: block; max-width: 440px; margin-inline: auto; }
   .hero-fallback .ring { right: 50%; top: 26%; transform: translate(50%, -50%); width: 62vw; animation: none; }
@@ -505,6 +506,7 @@ footer p { margin: 8px 0 0; max-width: 60ch; }
   .stats, .grid, .steps { grid-template-columns: 1fr; }
   .card.wide { grid-column: auto; }
   .hero-actions .btn { width: 100%; }
+  .btn { white-space: normal; height: auto; min-height: var(--h); padding: 12px 22px; text-align: center; line-height: 1.25; }
   .eyebrow { font-size: 11px; letter-spacing: .04em; padding: 7px 12px; }
   .hero-content { padding-top: 50vh; }
   .bubble { max-width: 96%; }

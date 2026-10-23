@@ -6,6 +6,7 @@
 const $ = (id) => document.getElementById(id);
 const MOCK = new URLSearchParams(location.search).has('mock');
 const STAGE_W = 1280;
+const APP_H = 708; // stage is 1280x800; the bottom 92px is the Alexa caption strip
 const APPS_PROTOCOL = '2026-01-26';
 
 const CHIPS = [
@@ -105,7 +106,7 @@ function say(text) {
   const finish = () => {
     if (token !== speakToken) return;
     light(listening ? 'listening' : 'idle');
-    hideCaptionSoon(4500);
+    hideCaptionSoon(2500);
   };
   const estimate = Math.min(12000, 900 + text.length * 58);
   if (muted || !('speechSynthesis' in window)) { setTimeout(finish, estimate); return; }
@@ -204,11 +205,13 @@ function tickTimers() {
 setInterval(tickTimers, 250);
 
 /* ---------- engine badge ---------- */
-function setEngine(engine) {
+function setEngine(engine, idle = false) {
   if (!engine) return;
   const b = $('engineBadge');
   b.className = 'badge engine ' + engine;
-  b.textContent = engine === 'bedrock' ? 'engine · Amazon Bedrock' : 'engine · rules (no LLM)';
+  b.textContent = idle
+    ? (engine === 'bedrock' ? 'Amazon Bedrock ready' : 'rules engine (no LLM)')
+    : (engine === 'bedrock' ? 'engine · Amazon Bedrock' : 'engine · rules');
 }
 
 /* ---------- MCP trace drawer ---------- */
@@ -330,7 +333,7 @@ addEventListener('message', async (ev) => {
         hostCapabilities: { serverTools: {}, message: {} },
         hostContext: {
           theme: 'dark', displayMode: 'inline', platform: 'web', locale: 'en-US',
-          containerDimensions: { width: STAGE_W, height: 800 },
+          containerDimensions: { width: STAGE_W, height: APP_H },
           deviceCapabilities: { touch: true, hover: false },
         },
       });
@@ -526,7 +529,7 @@ async function loadState() {
       $('savedUsd').textContent = money(st.impact.rescuedUsd);
       $('savedText').textContent = `${st.impact.mealsCooked ?? 0} use-it-up meals this week`;
     }
-    if (st.bedrock !== undefined && !lastTurn) setEngine(st.bedrock ? 'bedrock' : 'rules');
+    if (st.bedrock !== undefined && !lastTurn) setEngine(st.bedrock ? 'bedrock' : 'rules', true);
     setTimers(st.timers);
     let risk = st.atRisk || null;
     if (!risk && !MOCK) {
@@ -569,6 +572,8 @@ $('resetBtn').onclick = async () => {
   $('trList').innerHTML = '<p class="tr-empty">Demo reset. Talk to Alexa to start a new trace.</p>';
   lastTurn = null;
   $('caption').classList.remove('show');
+  $('capYou').textContent = '';
+  $('capAlexa').textContent = '';
   light('idle');
   showIdle(true);
   loadState();

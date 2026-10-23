@@ -479,7 +479,8 @@ tool({
   handler: ({ action, member, kind, value }) => {
     if (action === 'get') {
       const h = getState().household;
-      const facts = h.members.flatMap(m => [...m.allergies.map(a => `${m.name} is allergic to ${a}`), ...m.dislikes.map(d => `${m.name} doesn't like ${d}`)]);
+      const label = (a: string) => ({ peanut: 'peanuts', 'tree-nut': 'tree nuts', egg: 'eggs' } as Record<string, string>)[a] ?? a;
+      const facts = h.members.flatMap(m => [...m.allergies.map(a => `${m.name} is allergic to ${label(a)}`), ...m.dislikes.map(d => `${m.name} doesn't like ${d}`)]);
       return env('household_memory', facts.length ? `Here's what I remember: ${listPhrase(facts)}.` : "I don't have any allergies or dislikes saved yet.", { household: h });
     }
     if (!kind || !value) return fail('household_memory', 'What should I remember, and for whom?');

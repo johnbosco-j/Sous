@@ -241,7 +241,7 @@ async function init() {
     if (w / h > 1.05) {
       Object.assign(base, { x: Math.min(3.4, 1.4 + (w / h) * 1.15), y: 0.1, s: 1 });
     } else {
-      Object.assign(base, { x: 0, y: 2.25, s: 0.46 });
+      Object.assign(base, { x: 0, y: 2.6, s: 0.46 });
     }
     world.scale.setScalar(base.s);
   }

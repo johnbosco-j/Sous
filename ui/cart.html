@@ -12,6 +12,7 @@
   --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html,body{width:100%;height:100%;overflow:hidden}
 body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
   background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
@@ -48,7 +49,7 @@ button{font-family:inherit}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 <style>
-.wrap{position:absolute;inset:0;padding:40px 44px 30px;display:grid;grid-template-columns:1fr 430px;gap:28px}
+.wrap{position:absolute;inset:0;padding:32px 44px 22px;display:grid;grid-template-columns:1fr 430px;gap:28px}
 .left{min-height:0;display:flex;flex-direction:column;gap:20px}
 .left .h1{margin-top:12px;font-size:50px}
 .lines{flex:1;min-height:0;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:10px}
@@ -99,7 +100,7 @@ button{font-family:inherit}
     <div class="hr"></div>
     <div class="total"><span>Total</span><b id="total"></b></div>
     <div class="confirm" id="confirm">
-      <div class="lock">🔒 Nothing is ordered until you confirm.<br>Say <b>“Yes, place the order”</b></div>
+      <div class="lock" id="lock">🔒 Nothing is ordered until you confirm.<br>Say <b>“Yes, place the order”</b></div>
       <button class="btn btn-primary" id="place"></button>
     </div>
     <div class="placed" id="placed" hidden>
@@ -183,7 +184,8 @@ Sous.onResult(function (r) {
   var d = Sous.data(r); cart = d;
   var lines = d.lines || [];
   var count = lines.reduce(function (s, l) { return s + (Number(l.qty) || 1); }, 0);
-  document.getElementById('headline').innerHTML = lines.length
+  var placedNow = d.status === 'placed';
+  document.getElementById('headline').innerHTML = placedNow ? 'Groceries are <em>on the way</em>' : lines.length
     ? lines.length + ' item' + (lines.length === 1 ? '' : 's') + ' to finish <em>the plan</em>'
     : 'Your pantry has <em>everything</em>';
   document.getElementById('lines').innerHTML = lines.map(function (l, n) {
@@ -198,9 +200,12 @@ Sous.onResult(function (r) {
   document.getElementById('fee').textContent = d.deliveryFeeUsd ? Sous.money(d.deliveryFeeUsd) : 'Free';
   document.getElementById('total').textContent = Sous.money(d.totalUsd);
   document.getElementById('place').textContent = 'Place order · ' + Sous.money(d.totalUsd);
-  var placed = d.status === 'placed';
+  var placed = placedNow;
   document.getElementById('eyebrow').textContent = placed ? 'Order confirmed' : 'Shopping cart · for this week’s plan';
   document.getElementById('confirm').hidden = placed || !lines.length;
+  document.getElementById('lock').innerHTML = d.status === 'awaiting_confirmation'
+    ? '🔒 Waiting for your OK. Say <b>“Yes, place the order”</b> or tap below.'
+    : '🔒 Nothing is ordered until you confirm.<br>Say <b>“Yes, place the order”</b>';
   document.getElementById('placed').hidden = !placed;
   if (placed) {
     document.getElementById('oid').textContent = 'ORDER ' + (d.orderId || '');

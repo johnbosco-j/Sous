@@ -12,6 +12,7 @@
   --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html,body{width:100%;height:100%;overflow:hidden}
 body{color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;
   background:radial-gradient(900px 520px at 88% -12%,rgba(246,167,42,.17),transparent 62%),
@@ -48,27 +49,27 @@ button{font-family:inherit}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 <style>
-.wrap{position:absolute;inset:0;padding:34px 44px 30px;display:grid;grid-template-rows:auto 1fr auto;gap:22px}
+.wrap{position:absolute;inset:0;padding:28px 44px 22px;display:grid;grid-template-rows:auto 1fr auto;gap:22px}
 .bar{display:flex;align-items:center;gap:18px}
 .badge{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 12px 30px -14px var(--g2)}
 .ttl{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.05}
 .count{margin-top:6px;font:800 15px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--saffron)}
 .dots{margin-left:auto;display:flex;gap:8px}
 .dots i{width:34px;height:10px;border-radius:999px;background:rgba(255,246,236,.14);transition:background .3s,width .3s}
-.dots i.done{background:rgba(246,167,42,.55)}
+.dots i.past{background:rgba(246,167,42,.55)}
 .dots i.on{width:58px;background:linear-gradient(90deg,var(--saffron),var(--tomato))}
 .main{min-height:0;display:grid;grid-template-columns:1fr 330px;gap:26px}
 .stepbox{position:relative;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:34px 40px;border-radius:32px;
   background:linear-gradient(160deg,rgba(255,246,236,.07),rgba(255,246,236,.02));box-shadow:inset 0 0 0 1px var(--line)}
 .stepno{position:absolute;top:22px;left:40px;font:800 15px/1 var(--sans);letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
-.steptext{font-family:var(--serif);font-weight:500;font-size:50px;line-height:1.12;letter-spacing:-.015em}
+.steptext{font-family:var(--serif);font-weight:500;font-size:48px;line-height:1.12;letter-spacing:-.015em}
 .steptext.m{font-size:42px}.steptext.s{font-size:35px}
 .tip{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;border-radius:16px;background:rgba(246,167,42,.10);box-shadow:inset 0 0 0 1px rgba(246,167,42,.28);font:600 19px/1.35 var(--sans);color:#ffe1b0}
 .timerbtn{align-self:flex-start}
 .ing{min-height:0;display:flex;flex-direction:column;padding:22px 22px 18px;border-radius:28px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
 .ing h3{font:800 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
 .ing ul{list-style:none;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:4px}
-.ing li{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line);font:700 18px/1.2 var(--sans)}
+.ing li{display:flex;align-items:center;gap:12px;padding:7px 4px;border-bottom:1px solid var(--line);font:700 17px/1.2 var(--sans)}
 .ing li:last-child{border-bottom:0}
 .ck{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:15px;background:rgba(95,202,129,.2);color:var(--basil)}
 .ck.no{background:rgba(255,181,71,.16);color:var(--soon)}
@@ -230,7 +231,7 @@ Sous.onResult(function (r) {
   document.getElementById('title').textContent = d.title || '';
   document.getElementById('count').textContent = 'Step ' + (i + 1) + ' of ' + n;
   document.getElementById('stepno').textContent = 'Step ' + (i + 1);
-  var dots = ''; for (var k = 0; k < n; k++) dots += '<i class="' + (k < i ? 'done' : k === i ? 'on' : '') + '"></i>';
+  var dots = ''; for (var k = 0; k < n; k++) dots += '<i class="' + (k < i ? 'past' : k === i ? 'on' : '') + '"></i>';
   document.getElementById('dots').innerHTML = dots;
   var st = document.getElementById('steptext'), text = step.text || '';
   st.textContent = text; st.className = 'steptext' + (text.length > 190 ? ' s' : text.length > 120 ? ' m' : '');
